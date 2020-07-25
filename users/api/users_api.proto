@@ -1,0 +1,83 @@
+syntax="proto3";
+
+package userspb;
+option go_package = "./userspb";
+
+import "google/api/annotations.proto";
+
+message EmptyData {}
+
+message PingMessage {
+  string greeting = 1;
+}
+
+
+message User {
+  int64 id=1;
+  string username=2;
+  int64 created=3;
+}
+
+message CreateUserRequest {
+	string username=1;
+	string password=4;
+}
+
+message CreateUserResponse {
+  User user=1;
+}
+
+message GetUsersResponse {
+	repeated User users=1;
+}
+
+message GetUserRequest {
+	int64 id=1;
+}
+
+message GetUserResponse {
+  User user=1;
+}
+
+message AuthenticateRequest {
+	string username=1;
+	string password=2;
+}
+
+message AuthenticateResponse {
+	bool Auth=1;
+	int64 userid=2;
+}
+
+service UsersService {
+  rpc SayHello(PingMessage) returns (PingMessage) {
+    option (google.api.http) = {
+      post: "/1/ping"
+      body: "*"
+    };
+  }
+	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+     option (google.api.http) = {
+       post: "/users/create"
+       body: "*"
+     };
+  };
+	rpc GetUsers(EmptyData) returns (GetUsersResponse) {
+     option (google.api.http) = {
+       post: "/users/get"
+       body: "*"
+     };
+  };
+	rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+     option (google.api.http) = {
+       post: "/user/get"
+       body: "*"
+     };
+  };
+	rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
+     option (google.api.http) = {
+       post: "/auth"
+       body: "*"
+     };
+  };
+}

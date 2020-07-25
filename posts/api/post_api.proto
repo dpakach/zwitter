@@ -1,0 +1,71 @@
+syntax="proto3";
+
+package postspb;
+option go_package = "./postspb";
+
+import "google/api/annotations.proto";
+
+message PingMessage {
+  string greeting = 1;
+}
+
+message EmptyData {}
+
+message Post {
+  int64 id=1;
+  string text=2;
+  int64 created=3;
+  User author=4;
+}
+
+message User {
+  int64 id=1;
+  string username=2;
+}
+
+message CreatePostRequest {
+	string text=1;
+}
+
+message CreatePostResponse {
+  Post post=1;
+}
+
+message GetPostsResponse {
+	repeated Post posts=1;
+}
+
+message GetPostRequest {
+	int64 id=1;
+}
+
+message GetPostResponse {
+  Post post=1;
+}
+
+service PostsService {
+  rpc SayHello(PingMessage) returns (PingMessage) {
+    option (google.api.http) = {
+      post: "/1/ping"
+      body: "*"
+    };
+  }
+	rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {
+     option (google.api.http) = {
+       post: "/posts/create"
+       body: "*"
+     };
+  };
+	rpc GetPosts(EmptyData) returns (GetPostsResponse) {
+     option (google.api.http) = {
+       post: "/posts/get"
+       body: "*"
+     };
+  };
+	rpc GetPost(GetPostRequest) returns (GetPostResponse) {
+     option (google.api.http) = {
+       post: "/post/get"
+       body: "*"
+     };
+  };
+}
