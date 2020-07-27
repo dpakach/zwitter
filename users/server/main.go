@@ -15,7 +15,6 @@ import (
 	"github.com/dpakach/zwitter/users/api"
 	"github.com/dpakach/zwitter/users/api/userspb"
 
-	"github.com/dpakach/zwitter/pkg/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -37,7 +36,6 @@ func startGRPCServer(address, certFile, keyFile string) (*grpc.Server, error) {
 
 	opts := []grpc.ServerOption{
 		grpc.Creds(creds),
-		grpc.UnaryInterceptor(auth.UnaryInterceptor),
 	}
 
 	grpcServer := grpc.NewServer(opts...)
@@ -59,7 +57,7 @@ func startRESTServer(address, grpcAddress, certFile string) (*http.Server, error
 
 	defer cancel()
 
-	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(auth.CredMatcher))
+	mux := runtime.NewServeMux()
 
 	creds, err := credentials.NewClientTLSFromFile(certFile, "grpcserver")
 

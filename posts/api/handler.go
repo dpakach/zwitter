@@ -12,8 +12,6 @@ import (
 	"github.com/dpakach/zwitter/pkg/data"
 	"github.com/dpakach/zwitter/posts/api/postspb"
 	"github.com/dpakach/zwitter/users/api/userspb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 type Server struct {}
@@ -28,29 +26,6 @@ func postPb(post *data.Post, user *userspb.User) *postspb.Post {
 }
 
 
-func NewUsersClient() (*grpc.ClientConn, userspb.UsersServiceClient) {
-  var conn *grpc.ClientConn
-
-  creds, err := credentials.NewClientTLSFromFile("cert/server.crt", "grpcserver")
-  if err != nil {
-    log.Fatalf("could not load tls cert: %s", err)
-  }
-
-  auth := auth.Authentication{
-    Login: "john",
-    Password: "doe",
-  }
-
-  conn, err = grpc.Dial(":8888", grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&auth))
-  if err != nil {
-    log.Fatalf("did not connect: %s", err)
-  }
-
-  c := userspb.NewUsersServiceClient(conn)
-
-  return conn, c
-}
-
 func (s *Server) SayHello(ctx context.Context, in *postspb.PingMessage) (*postspb.PingMessage, error) {
   log.Printf("Received message %s", in.Greeting)
   return &postspb.PingMessage{Greeting: "Hello from posts service"}, nil
@@ -58,17 +33,16 @@ func (s *Server) SayHello(ctx context.Context, in *postspb.PingMessage) (*postsp
 
 func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) (*postspb.CreatePostResponse, error) {
   ts := time.Now().Unix()
-	userid, ok := int64(1), true //ctx.Value("userid").(int64)
+	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
 	if !ok {
 		return nil, errors.New("Invalid userid")
 	}
 
-  conn, cl := NewUsersClient()
+  conn, cl := auth.NewUsersClient()
   defer conn.Close()
 
-  resp, err := cl.GetUser(context.Background(), &userspb.GetUserRequest{Id: userid})
+  resp, err := cl.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: user.Id})
 	if err != nil {
-    fmt.Println(err)
 		return nil, err
 	}
 
@@ -83,7 +57,7 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 }
 
 func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.GetPostsResponse, error) {
-  conn, cl := NewUsersClient()
+  conn, cl := auth.NewUsersClient()
   defer conn.Close()
 
   posts := data.PostStore
@@ -91,7 +65,7 @@ func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.
   result := []*postspb.Post{}
 
   for _, post := range posts.Posts{
-    resp, err := cl.GetUser(context.Background(), &userspb.GetUserRequest{Id: post.Author})
+    resp, err := cl.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
     if err != nil {
       return nil, errors.New("Failed while retriving users")
     }
@@ -110,10 +84,10 @@ func (s *Server) GetPost(ctx context.Context, in *postspb.GetPostRequest) (*post
     return nil, errors.New("Could not find the post")
   }
 
-  conn, cl := NewUsersClient()
+  conn, cl := auth.NewUsersClient()
   defer conn.Close()
 
-  resp, err := cl.GetUser(context.Background(), &userspb.GetUserRequest{Id: post.Author})
+  resp, err := cl.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
   if err != nil {
     return nil, errors.New("Failed while retriving user")
   }

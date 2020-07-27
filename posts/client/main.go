@@ -20,8 +20,8 @@ func main() {
   }
 
   auth := auth.Authentication{
-    Login: "john",
-    Password: "doe",
+    Login: "user2",
+    Password: "newpassword",
   }
 
   conn, err = grpc.Dial(":7777", grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&auth))
@@ -33,13 +33,13 @@ func main() {
 
   c := postspb.NewPostsServiceClient(conn)
 
-  //response, err := c.SayHello(context.Background(), &postspb.PingMessage{Greeting: "foo"})
+  response, err := c.SayHello(context.Background(), &postspb.PingMessage{Greeting: "foo"})
   //response, err := createPost(c, "This is a Hello Post")
   //response, err := getPosts(c)
-  response, err := getPost(c, 1)
+  //response, err := getPost(c, 1)
 
   if err != nil {
-    log.Fatalf("Error when calling SayHello: %s", err)
+    log.Fatalf("Error when calling rpc method: %s", err)
   }
 
   log.Printf("Response from server: %s", response)

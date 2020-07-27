@@ -9,13 +9,22 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/dpakach/zwitter/users/api/userspb"
+
+	"google.golang.org/grpc/credentials"
 )
 
 type contextKey int
 
 const (
-  clientIDKey contextKey = iota
+  ClientIDKey contextKey = iota
 )
+
+type UserMetaData struct {
+  Id int64
+  Username string
+}
 
 type Authentication struct {
   Login string
@@ -46,33 +55,51 @@ func CredMatcher(headerName string) (mdName string, ok bool) {
   return "", false
 }
 
-func authenticateClient(ctx context.Context) (string, error) {
+func authenticateClient(ctx context.Context) (*userspb.User, error) {
   if md, ok := metadata.FromIncomingContext(ctx); ok {
     clientLogin := strings.Join(md["login"], "")
     clientPassword := strings.Join(md["password"], "")
 
-    if clientLogin != "john" {
-      return "", fmt.Errorf("unknown user %s", clientLogin)
-    }
+    conn, cl := NewUsersClient()
+    defer conn.Close()
 
-    if clientPassword != "doe" {
-      return "", fmt.Errorf("bad Password %s", clientPassword)
+    resp, err := cl.Authenticate(context.Background(), &userspb.AuthenticateRequest{Username: clientLogin, Password: clientPassword})
+
+    if err != nil {
+      return nil, fmt.Errorf("Failed to authenticate client: %v", err)
     }
 
     log.Printf("authenticated client: %s", clientLogin)
-    return "42", nil
+    return resp.User, nil
   }
 
-  return "", fmt.Errorf("missing credentials")
+  return nil, fmt.Errorf("missing credentials")
 }
 
 func UnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-  clientID, err := authenticateClient(ctx)
+  user, err := authenticateClient(ctx)
   if err != nil {
     return nil, err
   }
 
-  ctx = context.WithValue(ctx, clientIDKey, clientID)
+  ctx = context.WithValue(ctx, ClientIDKey, &UserMetaData{Id: user.Id, Username: user.Username})
   return handler(ctx, req)
 }
 
+func NewUsersClient() (*grpc.ClientConn, userspb.UsersServiceClient) {
+  var conn *grpc.ClientConn
+
+  creds, err := credentials.NewClientTLSFromFile("cert/server.crt", "grpcserver")
+  if err != nil {
+    log.Fatalf("could not load tls cert: %s", err)
+  }
+
+  conn, err = grpc.Dial(":8888", grpc.WithTransportCredentials(creds))
+  if err != nil {
+    log.Fatalf("did not connect: %s", err)
+  }
+
+  c := userspb.NewUsersServiceClient(conn)
+
+  return conn, c
+}

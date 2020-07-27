@@ -2,7 +2,6 @@ package api
 
 import (
   "context"
-  "fmt"
   "log"
   "time"
 
@@ -54,8 +53,7 @@ func (s *Server) GetUsers(ctx context.Context, in *userspb.EmptyData) (*userspb.
 }
 
 func (s *Server) GetUser(ctx context.Context, in *userspb.GetUserRequest) (*userspb.GetUserResponse, error) {
-  user := data.UserStore.GetByID(in.GetId())
-  fmt.Println("Get User")
+  user := data.UserStore.GetByUsername(in.GetUsername())
   if user == nil {
     return nil, status.Errorf(codes.NotFound, "User not found")
   }
@@ -68,7 +66,15 @@ func (s *Server) Authenticate(ctx context.Context, in *userspb.AuthenticateReque
     return nil, status.Errorf(codes.NotFound, "User not found")
   }
   if auth.NewSHA256(in.GetPassword()) == user.Password {
-    return &userspb.AuthenticateResponse{Auth: true, Userid: user.ID}, nil
+    return &userspb.AuthenticateResponse{Auth: true, User: userPb(user)}, nil
   }
-  return &userspb.AuthenticateResponse{Auth: false, Userid: -1}, nil
+  return &userspb.AuthenticateResponse{Auth: false}, nil
+}
+
+func (s *Server) GetUserByID(ctx context.Context, in *userspb.GetUserByIDRequest) (*userspb.GetUserResponse, error) {
+  user := data.UserStore.GetByID(in.GetId())
+  if user == nil {
+    return nil, status.Errorf(codes.NotFound, "User not found")
+  }
+  return &userspb.GetUserResponse{User: userPb(user)}, nil
 }
