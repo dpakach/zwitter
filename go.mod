@@ -3,6 +3,7 @@ module github.com/dpakach/zwitter
 go 1.13
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/protobuf v1.4.2
 	github.com/grpc-ecosystem/grpc-gateway v1.14.6
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect

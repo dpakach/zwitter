@@ -19,12 +19,16 @@ func main() {
     log.Fatalf("could not load tls cert: %s", err)
   }
 
-  auth := auth.Authentication{
-    Login: "user2",
-    Password: "newpassword",
+  // auth := auth.BasicAuthentication{
+  //   Login: "user2",
+  //   Password: "newpassword",
+  // }
+
+  authbearer := &auth.BearerAuthentication {
+    Token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE1OTYzNzk5MjEsInVzZXJfaWQiOjEsInVzZXJuYW1lIjoidXNlcjIifQ.L3mqIbeuwI75qsaA-IEi8OeOtPeFH1ev8ngbJHmrs3c",
   }
 
-  conn, err = grpc.Dial(":7777", grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&auth))
+  conn, err = grpc.Dial(":7777", grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(authbearer))
   if err != nil {
     log.Fatalf("did not connect: %s", err)
   }
@@ -33,8 +37,8 @@ func main() {
 
   c := postspb.NewPostsServiceClient(conn)
 
-  response, err := c.SayHello(context.Background(), &postspb.PingMessage{Greeting: "foo"})
-  //response, err := createPost(c, "This is a Hello Post")
+  //response, err := c.SayHello(context.Background(), &postspb.PingMessage{Greeting: "foo"})
+  response, err := createPost(c, "This is a Hello Post")
   //response, err := getPosts(c)
   //response, err := getPost(c, 1)
 
@@ -48,9 +52,11 @@ func main() {
 func createPost(c postspb.PostsServiceClient, text string) (*postspb.CreatePostResponse, error) {
   return c.CreatePost(context.Background(), &postspb.CreatePostRequest{Text: text})
 }
+
 func getPosts(c postspb.PostsServiceClient) (*postspb.GetPostsResponse, error) {
   return c.GetPosts(context.Background(), &postspb.EmptyData{})
 }
+
 func getPost(c postspb.PostsServiceClient, id int) (*postspb.GetPostResponse, error) {
   return c.GetPost(context.Background(), &postspb.GetPostRequest{Id: int64(id)})
 }

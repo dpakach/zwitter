@@ -27,11 +27,11 @@ func main() {
 
   c := userspb.NewUsersServiceClient(conn)
 
-  //response, err := createUser(c, "user2", "newpassword")
+  response, err := createUser(c, "user2", "newpassword")
   //response, err := getUsers(c)
   //response, err := getUser(c, "user2")
   //response, err := getUserById(c, 1)
-  response, err := authenticate(c, "user2", "newpassword")
+  //response, err := authenticate(c, "user2", "newpassword")
 
   if err != nil {
     log.Fatalf("Error when calling rpc Server: %s", err)

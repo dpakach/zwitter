@@ -1,0 +1,74 @@
+syntax="proto3";
+
+package authpb;
+option go_package = "./authpb";
+
+import "google/api/annotations.proto";
+
+message PingMessage {
+  string greeting = 1;
+}
+
+message EmptyData {}
+
+message GetTokenRequest {
+  string username=1;
+  string password=2;
+}
+
+message GetTokenResponse {
+  string token=1;
+  string refreshToken=2;
+}
+
+message AuthenticateTokenRequest {
+  string token=1;
+}
+
+message User {
+  int64 id=1;
+  string username=2;
+  int64 created=3;
+}
+
+message AuthenticateTokenResponse {
+  bool auth=1;
+  User user=2;
+}
+
+message RefreshTokenRequest {
+  string token=1;
+}
+
+message RefreshTokenResponse {
+  string token=1;
+}
+
+service AuthService {
+  rpc SayHello(PingMessage) returns (PingMessage) {
+    option (google.api.http) = {
+      post: "/1/ping"
+      body: "*"
+    };
+  }
+	rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {
+     option (google.api.http) = {
+       post: "/token/get"
+       body: "*"
+     };
+  };
+
+  rpc AuthenticateToken(AuthenticateTokenRequest) returns (AuthenticateTokenResponse) {
+     option (google.api.http) = {
+       post: "/token/auth"
+       body: "*"
+     };
+  }
+
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
+     option (google.api.http) = {
+       post: "/token/refresh"
+       body: "*"
+     };
+  }
+}
