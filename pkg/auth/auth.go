@@ -88,11 +88,11 @@ func CredMatcher(headerName string) (mdName string, ok bool) {
 }
 
 func AuthenticateClient(ctx context.Context) (*authpb.User, error) {
-  if md, ok := metadata.FromIncomingContext(ctx); ok {
-    token := strings.Join(md["token"], "")
-    if token == "" {
-      return nil, fmt.Errorf("Failed to authenticate client: Token not found in the request")
-    }
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		token := strings.Join(md["token"], "")
+		if token == "" {
+			return nil, fmt.Errorf("Failed to authenticate client: Token not found in the request")
+		}
 		conn, cl := NewAuthClient()
 		defer conn.Close()
 
