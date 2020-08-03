@@ -9,18 +9,18 @@ type Posts struct {
 
 // AddDbList adds a new Post to Posts.Posts
 func (p *Posts) AddDbList(post *Post) {
-  post.ID = p.NewID()
+	post.ID = p.NewID()
 	p.Posts = append(p.Posts, *post)
 }
 
 // ReadFromDb updates Posts.Posts from the file
 func (p *Posts) ReadFromDb() *Posts {
-  return p
+	return p
 }
 
 // CommitDb writes Posts.Posts to the file
 func (p *Posts) CommitDb() {
-  return
+	return
 }
 
 // GetByID returns Post with given ID
@@ -60,6 +60,5 @@ func (p *Post) SetID(id int64) { p.ID = id }
 
 // SaveToStore saves the Post to the given dB store
 func (p *Post) SaveToStore() {
-  PostStore.AddDbList(p)
+	PostStore.AddDbList(p)
 }
-

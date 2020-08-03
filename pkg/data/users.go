@@ -9,18 +9,18 @@ type Users struct {
 
 // AddDbList adds a User type to Users.Users
 func (p *Users) AddDbList(user *User) {
-  user.ID = p.NewID()
+	user.ID = p.NewID()
 	p.Users = append(p.Users, *user)
 }
 
 // ReadFromDb Updates the database Instance from the file
 func (p *Users) ReadFromDb() *Users {
-  return p
+	return p
 }
 
 // CommitDb writes the current database instance to the file
 func (p *Users) CommitDb() {
-  return
+	return
 }
 
 // GetByID returns a user with given ID from the database instance
@@ -59,7 +59,7 @@ func (p *Users) GetByUsername(username string) *User {
 type User struct {
 	ID       int64  `json:"id"`
 	Username string `json:"username"`
-  Password string `json:"-"`
+	Password string `json:"-"`
 	Created  int64  `json:"created"`
 }
 
@@ -71,5 +71,5 @@ func (p *User) SetID(id int64) { p.ID = id }
 
 // SaveToStore saves the user to the store
 func (p *User) SaveToStore() {
-  UserStore.AddDbList(p)
+	UserStore.AddDbList(p)
 }

@@ -12,8 +12,8 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
-	"github.com/dpakach/zwitter/auth/api/authpb"
 	"github.com/dpakach/zwitter/auth/api"
+	"github.com/dpakach/zwitter/auth/api/authpb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -21,112 +21,112 @@ import (
 
 func startGRPCServer(address, certFile, keyFile string) (*grpc.Server, error) {
 
-  lis, err := net.Listen("tcp", address)
+	lis, err := net.Listen("tcp", address)
 
-  if err != nil {
-    return nil, fmt.Errorf("failed to listen: %v", err)
-  }
+	if err != nil {
+		return nil, fmt.Errorf("failed to listen: %v", err)
+	}
 
-  s := api.Server{}
+	s := api.Server{}
 
-  creds, err := credentials.NewServerTLSFromFile("cert/server.crt", "cert/server.key")
-  if err != nil {
-    return nil, fmt.Errorf("Failed to load TLS keys %v", err)
-  }
+	creds, err := credentials.NewServerTLSFromFile("cert/server.crt", "cert/server.key")
+	if err != nil {
+		return nil, fmt.Errorf("Failed to load TLS keys %v", err)
+	}
 
-  opts := []grpc.ServerOption{
-    grpc.Creds(creds),
-  }
+	opts := []grpc.ServerOption{
+		grpc.Creds(creds),
+	}
 
-  grpcServer := grpc.NewServer(opts...)
-  authpb.RegisterAuthServiceServer(grpcServer, &s)
+	grpcServer := grpc.NewServer(opts...)
+	authpb.RegisterAuthServiceServer(grpcServer, &s)
 
-  log.Printf("starting HTTP/2 gRPC server on %s", address)
+	log.Printf("starting HTTP/2 gRPC server on %s", address)
 
-  if err := grpcServer.Serve(lis); err != nil {
-    return nil, fmt.Errorf("failed to serve: %s", err)
-  }
+	if err := grpcServer.Serve(lis); err != nil {
+		return nil, fmt.Errorf("failed to serve: %s", err)
+	}
 
-  return grpcServer, nil
+	return grpcServer, nil
 }
 
 func startRESTServer(address, grpcAddress, certFile string) (*http.Server, error) {
-  ctx := context.Background()
+	ctx := context.Background()
 
-  ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(ctx)
 
-  defer cancel()
+	defer cancel()
 
-  mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux()
 
-  creds, err := credentials.NewClientTLSFromFile(certFile, "grpcserver")
+	creds, err := credentials.NewClientTLSFromFile(certFile, "grpcserver")
 
-  if err != nil {
-    return nil, fmt.Errorf("could not load TLS certificate: %s", err)
-  }
+	if err != nil {
+		return nil, fmt.Errorf("could not load TLS certificate: %s", err)
+	}
 
-  opts := []grpc.DialOption{grpc.WithTransportCredentials((creds))}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials((creds))}
 
-  err = authpb.RegisterAuthServiceHandlerFromEndpoint(ctx, mux, grpcAddress, opts)
+	err = authpb.RegisterAuthServiceHandlerFromEndpoint(ctx, mux, grpcAddress, opts)
 
-  if err != nil {
-    return nil, fmt.Errorf("could not register server Ping: %s", err)
-  }
+	if err != nil {
+		return nil, fmt.Errorf("could not register server Ping: %s", err)
+	}
 
-  log.Printf("Starting HTTP/1.1 REST server on %s", address)
+	log.Printf("Starting HTTP/1.1 REST server on %s", address)
 
-  s := &http.Server{
-    Addr: address,
-    Handler: mux,
-  }
+	s := &http.Server{
+		Addr:    address,
+		Handler: mux,
+	}
 
-  err = s.ListenAndServe()
-  if err != nil {
-    log.Printf("Could not start REST server")
-  }
-  return s, nil
+	err = s.ListenAndServe()
+	if err != nil {
+		log.Printf("Could not start REST server")
+	}
+	return s, nil
 }
 
 func main() {
-  grpcAddress := fmt.Sprintf("%s:%d", "localhost", 9999)
-  restAddress := fmt.Sprintf("%s:%d", "localhost", 9990)
+	grpcAddress := fmt.Sprintf("%s:%d", "localhost", 9999)
+	restAddress := fmt.Sprintf("%s:%d", "localhost", 9990)
 
-  certFile := "cert/server.crt"
-  keyFile := "cert/server.key"
+	certFile := "cert/server.crt"
+	keyFile := "cert/server.key"
 
-  grpcServer := make(chan *grpc.Server)
-  restServer := make(chan *http.Server)
-  go func(s chan *grpc.Server) {
-    grpcServer, err  := startGRPCServer(grpcAddress, certFile, keyFile)
-    if err != nil {
-      log.Fatalf("failed to start gRPC server %s", err)
-    }
-    s <- grpcServer
-  }(grpcServer)
+	grpcServer := make(chan *grpc.Server)
+	restServer := make(chan *http.Server)
+	go func(s chan *grpc.Server) {
+		grpcServer, err := startGRPCServer(grpcAddress, certFile, keyFile)
+		if err != nil {
+			log.Fatalf("failed to start gRPC server %s", err)
+		}
+		s <- grpcServer
+	}(grpcServer)
 
-  go func(s chan *http.Server) {
-    restServer, err := startRESTServer(restAddress, grpcAddress, certFile)
+	go func(s chan *http.Server) {
+		restServer, err := startRESTServer(restAddress, grpcAddress, certFile)
 
-    fmt.Println(restServer)
+		fmt.Println(restServer)
 
-    if err != nil {
-      log.Fatalf("failed to start REST server %s", err)
-    }
-    s <- restServer
-  }(restServer)
+		if err != nil {
+			log.Fatalf("failed to start REST server %s", err)
+		}
+		s <- restServer
+	}(restServer)
 
-  gs := <-grpcServer
-  rs := <-restServer
+	gs := <-grpcServer
+	rs := <-restServer
 
-  sigChan := make(chan os.Signal)
-  signal.Notify(sigChan, os.Interrupt)
-  signal.Notify(sigChan, os.Kill)
+	sigChan := make(chan os.Signal)
+	signal.Notify(sigChan, os.Interrupt)
+	signal.Notify(sigChan, os.Kill)
 
-  sig := <-sigChan
+	sig := <-sigChan
 
-  fmt.Println("Recieved terminate, graceful shutdown", sig)
+	fmt.Println("Recieved terminate, graceful shutdown", sig)
 
-  tc, _ := context.WithTimeout(context.Background(), 30 * time.Second)
-  gs.Stop()
-  rs.Shutdown(tc)
+	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	gs.Stop()
+	rs.Shutdown(tc)
 }

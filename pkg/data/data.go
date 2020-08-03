@@ -7,9 +7,9 @@ import (
 )
 
 type DataType interface {
-  GetID()
-  SetID()
-  SaveToStore()
+	GetID()
+	SetID()
+	SaveToStore()
 }
 
 type Store struct {
@@ -45,4 +45,3 @@ func (s *Store) Write(data []byte) {
 		log.Fatal(err)
 	}
 }
-
