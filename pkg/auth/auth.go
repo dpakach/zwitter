@@ -87,13 +87,12 @@ func CredMatcher(headerName string) (mdName string, ok bool) {
 	return "", false
 }
 
-func authenticateClient(ctx context.Context) (*authpb.User, error) {
+func AuthenticateClient(ctx context.Context) (*authpb.User, error) {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		token := strings.Join(md["token"], "")
 		if token == "" {
 			return nil, fmt.Errorf("Failed to authenticate client: Token not found in the request")
 		}
-
 		conn, cl := NewAuthClient()
 		defer conn.Close()
 
@@ -108,16 +107,6 @@ func authenticateClient(ctx context.Context) (*authpb.User, error) {
 	}
 
 	return nil, fmt.Errorf("missing credentials")
-}
-
-func UnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	user, err := authenticateClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	ctx = context.WithValue(ctx, ClientIDKey, &UserMetaData{Id: user.Id, Username: user.Username})
-	return handler(ctx, req)
 }
 
 func NewUsersClient() (*grpc.ClientConn, userspb.UsersServiceClient) {

@@ -25,7 +25,7 @@ func main() {
 	// }
 
 	authbearer := &auth.BearerAuthentication{
-		Token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE1OTYzNzk5MjEsInVzZXJfaWQiOjEsInVzZXJuYW1lIjoidXNlcjIifQ.L3mqIbeuwI75qsaA-IEi8OeOtPeFH1ev8ngbJHmrs3c",
+		Token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE1OTY0MjYzMDQsInVzZXJfaWQiOjEsInVzZXJuYW1lIjoidXNlcjIifQ.QWhspHFiGEDCONk_ocO5AV9Td3xXbAG_1VTGyI8iSFg",
 	}
 
 	conn, err = grpc.Dial(":7777", grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(authbearer))
