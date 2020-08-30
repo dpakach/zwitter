@@ -12,4 +12,5 @@ require (
 	google.golang.org/genproto v0.0.0-20200724131911-43cab4749ae7
 	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.25.0
+	gopkg.in/yaml.v2 v2.2.3
 )

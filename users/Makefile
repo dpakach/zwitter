@@ -2,7 +2,7 @@ SERVER_OUT := "bin/server"
 CLIENT_OUT := "bin/client"
 API_OUT := "api/userspb/api.pb.go"
 API_REST_OUT := "api/userspb/api.pb.gw.go"
-PKG := "github.com/dpakach/zwitter"
+PKG := "github.com/dpakach/zwitter/users"
 SERVER_PKG_BUILD := "${PKG}/server"
 CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
@@ -40,6 +40,12 @@ client: dep api ## Build the binary file for client
 
 clean: ## Remove previous builds
 	@rm $(SERVER_OUT) $(CLIENT_OUT) $(API_OUT) $(API_REST_OUT)
+
+docker-build: server
+	docker build -t zwitter-users . --no-cache
+
+docker-run: docker-build
+	docker run --rm -it --name=z-users --network=host zwitter-users
 
 help: ## Display this help screen
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
