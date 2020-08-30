@@ -526,17 +526,17 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 }
 
 var (
-	pattern_UsersService_SayHello_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"1", "ping"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_UsersService_SayHello_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"users", "ping"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_UsersService_CreateUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"users", "create"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_UsersService_GetUsers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"users", "get"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_UsersService_GetUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "get"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_UsersService_GetUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"users", "username"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_UsersService_Authenticate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"auth"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_UsersService_Authenticate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"users", "auth"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_UsersService_GetUserByID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"auth"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_UsersService_GetUserByID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"users", "id"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
