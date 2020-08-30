@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/dpakach/zwitter/pkg/config"
 	"github.com/dpakach/zwitter/pkg/service"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
@@ -13,13 +14,20 @@ import (
 )
 
 func main() {
+
+  cfg, err := config.NewServerconfig("config/config.yaml")
+
+  if err != nil {
+    fmt.Println(err)
+  }
+
 	service := &service.Service{
-		Name:        "Users",
-		GrpcAddr:    fmt.Sprintf("%s:%d", "localhost", 8888),
-		RestAddr:    fmt.Sprintf("%s:%d", "localhost", 8889),
-		CertFile:    "cert/server.crt",
-		KeyFile:     "cert/server.key",
-		ServerName:  "grpcserver",
+		Name:        cfg.Server.Name,
+		GrpcAddr:    cfg.Server.GrpcAddr,
+		RestAddr:    cfg.Server.RestAddr,
+		CertFile:    cfg.Server.CertFile,
+		KeyFile:     cfg.Server.KeyFile,
+		ServerName:  cfg.Server.ServerName,
 		RpcBasePath: "/userspb.UsersService/",
 		AuthRPCs:    []string{},
 		RegisterGrpcServer: func(serv *grpc.Server) {

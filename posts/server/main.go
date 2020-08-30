@@ -6,6 +6,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
+	"github.com/dpakach/zwitter/pkg/config"
 	"github.com/dpakach/zwitter/pkg/service"
 	"github.com/dpakach/zwitter/posts/api"
 	"github.com/dpakach/zwitter/posts/api/postspb"
@@ -13,13 +14,20 @@ import (
 )
 
 func main() {
+
+  cfg, err := config.NewServerconfig("config/config.yaml")
+
+  if err != nil {
+    fmt.Println(err)
+  }
+
 	service := &service.Service{
-		Name:        "Posts",
-		GrpcAddr:    fmt.Sprintf("%s:%d", "localhost", 7777),
-		RestAddr:    fmt.Sprintf("%s:%d", "localhost", 7778),
-		CertFile:    "cert/server.crt",
-		KeyFile:     "cert/server.key",
-		ServerName:  "grpcserver",
+		Name:        cfg.Server.Name,
+		GrpcAddr:    cfg.Server.GrpcAddr,
+		RestAddr:    cfg.Server.RestAddr,
+		CertFile:    cfg.Server.CertFile,
+		KeyFile:     cfg.Server.KeyFile,
+		ServerName:  cfg.Server.ServerName,
 		RpcBasePath: "/postspb.PostsService/",
 		AuthRPCs: []string{
 			"CreatePost",
