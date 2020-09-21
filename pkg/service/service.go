@@ -8,32 +8,59 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"google.golang.org/grpc/metadata"
 
+	"github.com/dpakach/zwitter/auth/api/authpb"
 	"github.com/dpakach/zwitter/pkg/auth"
+	"github.com/dpakach/zwitter/pkg/config"
+	"github.com/dpakach/zwitter/posts/api/postspb"
+	"github.com/dpakach/zwitter/users/api/userspb"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
+	// "google.golang.org/grpc/credentials"
 )
 
 type Service struct {
-	Name               string
-	GrpcAddr           string
-	RestAddr           string
-	CertFile           string
-	KeyFile            string
-	ServerName         string
+	Config 			 *config.ServiceConfig
 	AuthRPCs           []string
-	RpcBasePath        string
+	RPCBasePath        string
 	RegisterGrpcServer func(*grpc.Server)
 	RegisterRestServer func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error
+	UsersServiceClient userspb.UsersServiceClient
+	PostsServiceClient postspb.PostsServiceClient
+	AuthServiceClient  authpb.AuthServiceClient
+}
+
+
+func (s *Service)AuthenticateClient(ctx context.Context) (*authpb.User, error) {
+	log.Printf("Authenticating client")
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		token := strings.Join(md["token"], "")
+		if token == "" {
+			return nil, fmt.Errorf("Failed to authenticate client: Token not found in the request")
+		}
+		resp, err := s.AuthServiceClient.AuthenticateToken(context.Background(), &authpb.AuthenticateTokenRequest{Token: token})
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to authenticate client: %v", err)
+		}
+		log.Printf("authenticated client: %s", resp.User.Username)
+		return resp.User, nil
+	}
+	return nil, fmt.Errorf("missing credentials")
 }
 
 func (s *Service) AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	ctx = context.WithValue(ctx, auth.ConfigKey, s.Config)
+
+	ctx = context.WithValue(ctx, auth.ServiceKey, s)
+
 	for _, method := range s.AuthRPCs {
-		if info.FullMethod == s.RpcBasePath+method {
-			user, err := auth.AuthenticateClient(ctx)
+		if info.FullMethod == s.RPCBasePath+method {
+			user, err := s.AuthenticateClient(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -48,26 +75,26 @@ func (s *Service) AuthInterceptor(ctx context.Context, req interface{}, info *gr
 
 func (s *Service) StartGRPCServer(serv *grpc.Server) error {
 
-	lis, err := net.Listen("tcp", s.GrpcAddr)
+	lis, err := net.Listen("tcp", s.Config.Server.GrpcAddr)
 
 	if err != nil {
 		return fmt.Errorf("failed to listen: %v", err)
 	}
 
-	creds, err := credentials.NewServerTLSFromFile(s.CertFile, s.KeyFile)
+	// creds, err := credentials.NewServerTLSFromFile(s.Config.Server.CertFile, s.Config.Server.KeyFile)
 	if err != nil {
 		return fmt.Errorf("Failed to load TLS keys %v", err)
 	}
 
 	opts := []grpc.ServerOption{
-		grpc.Creds(creds),
+		// grpc.Creds(creds),
 		grpc.UnaryInterceptor(s.AuthInterceptor),
 	}
 
 	serv = grpc.NewServer(opts...)
 	s.RegisterGrpcServer(serv)
 
-	log.Printf("starting HTTP/2 gRPC server on %s", s.GrpcAddr)
+	log.Printf("starting HTTP/2 gRPC server on %s", s.Config.Server.GrpcAddr)
 
 	if err := serv.Serve(lis); err != nil {
 		return fmt.Errorf("failed to serve: %s", err)
@@ -84,21 +111,23 @@ func (s *Service) StartRESTServer(serv *http.Server) error {
 
 	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(auth.CredMatcher))
 
-	creds, err := credentials.NewClientTLSFromFile(s.CertFile, s.ServerName)
-	if err != nil {
-		return fmt.Errorf("could not load TLS certificate: %s", err)
-	}
+	// creds, err := credentials.NewClientTLSFromFile(s.Config.Server.CertFile, s.Config.Server.ServerName)
+	// if err != nil {
+	// 	return fmt.Errorf("could not load TLS certificate: %s", err)
+	// }
 
-	opts := []grpc.DialOption{grpc.WithTransportCredentials((creds))}
-	err = s.RegisterRestServer(ctx, mux, s.GrpcAddr, opts)
-	//err = postspb.RegisterPostsServiceHandlerFromEndpoint(ctx, mux, s.GrpcAddr, opts)
+	opts := []grpc.DialOption{
+		// grpc.WithTransportCredentials((creds))
+		grpc.WithInsecure(),
+	}
+	err := s.RegisterRestServer(ctx, mux, s.Config.Server.GrpcAddr, opts)
 	if err != nil {
 		return fmt.Errorf("could not register server Ping: %s", err)
 	}
 
-	log.Printf("Starting HTTP/1.1 REST server on %s", s.RestAddr)
+	log.Printf("Starting HTTP/1.1 REST server on %s", s.Config.Server.RestAddr)
 
-	serv.Addr = s.RestAddr
+	serv.Addr = s.Config.Server.RestAddr
 	serv.Handler = mux
 
 	err = serv.ListenAndServe()

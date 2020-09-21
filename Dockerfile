@@ -1,3 +1,8 @@
-FROM envoyproxy/envoy:v1.14-latest
-COPY ./envoy.yaml /etc/envoy/envoy.yaml
-CMD /usr/local/bin/envoy -c /etc/envoy/envoy.yaml
+FROM envoyproxy/envoy-dev:latest
+
+RUN apt-get update && apt-get -q install -y \
+    curl
+COPY ./envoy.yaml /etc/front-envoy.yaml
+RUN chmod go+r /etc/front-envoy.yaml
+CMD /usr/local/bin/envoy -c /etc/front-envoy.yaml --service-cluster front-proxy
+

@@ -1,13 +1,12 @@
 package main
 
 import (
-	"context"
 	"fmt"
-
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"log"
 
 	"github.com/dpakach/zwitter/auth/api"
 	"github.com/dpakach/zwitter/auth/api/authpb"
+	"github.com/dpakach/zwitter/pkg/auth"
 	"github.com/dpakach/zwitter/pkg/config"
 	"github.com/dpakach/zwitter/pkg/service"
 	"google.golang.org/grpc"
@@ -15,27 +14,26 @@ import (
 
 func main() {
 
-  cfg, err := config.NewServerconfig("config/config.yaml")
+	cfg, err := config.NewServerconfig("config/config.yaml")
 
-  if err != nil {
-    fmt.Println(err)
-  }
+	if err != nil {
+		fmt.Println(err)
+	}
+	err, UsersEndpoint := cfg.GetNodeAddr("Users")
+	if err != nil {
+		log.Fatal(err)
+	}
+	conn, UsersClient := auth.NewUsersClient(UsersEndpoint)
+	defer conn.Close()
 
 	service := &service.Service{
-		Name:        cfg.Server.Name,
-		GrpcAddr:    cfg.Server.GrpcAddr,
-		RestAddr:    cfg.Server.RestAddr,
-		CertFile:    cfg.Server.CertFile,
-		KeyFile:     cfg.Server.KeyFile,
-		ServerName:  cfg.Server.ServerName,
-		RpcBasePath: "/authpb.AuthService/",
-		AuthRPCs:    []string{},
+		Config:   cfg,
+		AuthRPCs: []string{},
 		RegisterGrpcServer: func(serv *grpc.Server) {
 			authpb.RegisterAuthServiceServer(serv, &api.Server{})
 		},
-		RegisterRestServer: func(ctx context.Context, mux *runtime.ServeMux, grpcAddr string, opts []grpc.DialOption) error {
-			return authpb.RegisterAuthServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts)
-		},
+		RegisterRestServer: authpb.RegisterAuthServiceHandlerFromEndpoint,
+		UsersServiceClient: UsersClient,
 	}
 
 	service.Start()

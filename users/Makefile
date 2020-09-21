@@ -6,6 +6,7 @@ PKG := "github.com/dpakach/zwitter/users"
 SERVER_PKG_BUILD := "${PKG}/server"
 CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
+VERSION := 1.0
 
 .PHONY: all api server client
 
@@ -39,10 +40,10 @@ client: dep api ## Build the binary file for client
 	@go build -tags netgo -a -i -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
 
 clean: ## Remove previous builds
-	@rm $(SERVER_OUT) $(CLIENT_OUT) $(API_OUT) $(API_REST_OUT)
+	@rm -rf $(SERVER_OUT) $(CLIENT_OUT)
 
 docker-build:
-	docker build -t zwiter-users --build-arg service_name=users -f ../service/Dockerfile  .. --no-cache
+	docker build -t zwiter-users:$(VERSION) --build-arg service_name=users -f ../service/Dockerfile  .. --no-cache
 
 docker-run: docker-build
 	docker run --rm -it --name=z-users --network=host zwitter-users

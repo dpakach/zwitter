@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"github.com/dpakach/zwitter/pkg/auth"
 	"github.com/dpakach/zwitter/pkg/config"
 	"github.com/dpakach/zwitter/pkg/service"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -15,27 +17,30 @@ import (
 
 func main() {
 
-  cfg, err := config.NewServerconfig("config/config.yaml")
+	cfg, err := config.NewServerconfig("config/config.yaml")
 
-  if err != nil {
-    fmt.Println(err)
-  }
+	if err != nil {
+		fmt.Println(err)
+	}
+
+
+	err, AuthEndpoint := cfg.GetNodeAddr("Auth")
+	if err != nil {
+		log.Fatal(err)
+	}
+	conn, AuthClient := auth.NewAuthClient(AuthEndpoint)
+	defer conn.Close()
 
 	service := &service.Service{
-		Name:        cfg.Server.Name,
-		GrpcAddr:    cfg.Server.GrpcAddr,
-		RestAddr:    cfg.Server.RestAddr,
-		CertFile:    cfg.Server.CertFile,
-		KeyFile:     cfg.Server.KeyFile,
-		ServerName:  cfg.Server.ServerName,
-		RpcBasePath: "/userspb.UsersService/",
-		AuthRPCs:    []string{},
+		Config:   cfg,
+		AuthRPCs: []string{},
 		RegisterGrpcServer: func(serv *grpc.Server) {
 			userspb.RegisterUsersServiceServer(serv, &api.Server{})
 		},
 		RegisterRestServer: func(ctx context.Context, mux *runtime.ServeMux, grpcAddr string, opts []grpc.DialOption) error {
 			return userspb.RegisterUsersServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts)
 		},
+		AuthServiceClient: AuthClient,
 	}
 
 	service.Start()
