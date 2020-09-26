@@ -1,0 +1,45 @@
+version: "3.7"
+services:
+
+  front-envoy:
+    build: .
+    networks:
+      - envoymesh
+    expose:
+      - "8080"
+      - "8443"
+      - "8001"
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "8001:8001"
+
+  auth:
+    image: zwitter-auth
+    networks:
+      envoymesh:
+        aliases:
+          - auth
+    expose:
+      - "8000"
+
+  posts:
+    image: zwitter-posts
+    networks:
+      envoymesh:
+        aliases:
+          - posts
+    expose:
+      - "8000"
+
+  users:
+    image: zwitter-users 
+    networks:
+      envoymesh:
+        aliases:
+          - users
+    expose:
+      - "8000"
+
+networks:
+  envoymesh: {}

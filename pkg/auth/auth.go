@@ -81,7 +81,7 @@ func UUID() (string, error) {
 }
 
 func CredMatcher(headerName string) (mdName string, ok bool) {
-	if headerName == "Login" || headerName == "Password" {
+	if headerName == "Login" || headerName == "Password" || headerName == "Token" {
 		return headerName, true
 	}
 	return "", false

@@ -1,45 +1,41 @@
 version: "3.7"
 services:
 
-  front-envoy:
-    build: .
-    networks:
-      - envoymesh
-    expose:
-      - "8080"
-      - "8443"
-      - "8001"
+  posts:
+    image: zwiter-posts
     ports:
-      - "8080:8080"
-      - "8443:8443"
-      - "8001:8001"
+      - "7777:7777"
+      - "7778:7778"
+    network_mode: host
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./posts/config:/config
+      - ./posts/bin:/zwitter-bin
 
   auth:
-    image: zwitter-auth
-    networks:
-      envoymesh:
-        aliases:
-          - auth
-    expose:
-      - "8000"
-
-  posts:
-    image: zwitter-posts
-    networks:
-      envoymesh:
-        aliases:
-          - posts
-    expose:
-      - "8000"
+    image: zwiter-auth
+    ports:
+      - "9990:9990"
+      - "9999:9999"
+    network_mode: host
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./auth/config:/config
+      - ./auth/bin:/zwitter-bin
 
   users:
-    image: zwitter-users 
-    networks:
-      envoymesh:
-        aliases:
-          - users
-    expose:
-      - "8000"
+    image: zwiter-users 
+    ports:
+      - "8889:8889"
+      - "8888:8888"
+    network_mode: host
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./users/config:/config
+      - ./users/bin:/zwitter-bin
 
 networks:
-  envoymesh: {}
+  ist:
