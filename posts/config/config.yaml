@@ -5,3 +5,10 @@ Server:
   CertFile: ./cert/server.crt
   KeyFile: ./cert/server.key
   ServerName: grpcserver
+  Nodes:
+    - Name: Auth
+      Host: auth
+      Port: 9999
+    - Name: Users
+      Host: users
+      Port: 8888
