@@ -1,0 +1,38 @@
+---
+version: "3.7"
+services:
+  posts:
+    image: zwiter/posts:1.0
+    ports:
+      - "7777:7777"
+      - "7778:7778"
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./posts/config:/config
+      - ./posts/bin:/zwitter-bin
+
+  auth:
+    image: zwiter/auth:1.0
+    ports:
+      - "9990:9990"
+      - "9999:9999"
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./auth/config:/config
+      - ./auth/bin:/zwitter-bin
+
+  users:
+    image: zwiter/users:1.0
+    ports:
+      - "8889:8889"
+      - "8888:8888"
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./users/config:/config
+      - ./users/bin:/zwitter-bin
+
+networks:
+  ist:

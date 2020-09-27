@@ -1,0 +1,17 @@
+Server:
+  Name: Auth
+  GrpcAddr: 0.0.0.0:8888
+  RestAddr: 0.0.0.0:8889
+  CertFile: ./cert/server.crt
+  KeyFile: ./cert/server.key
+  ServerName: grpcserver
+  Nodes:
+    - Name: Posts
+      Host: posts
+      Port: 7777
+    - Name: Users
+      Host: users
+      Port: 8888
+    - Name: Auth
+      Host: auth
+      Port: 9999

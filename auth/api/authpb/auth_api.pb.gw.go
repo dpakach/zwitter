@@ -378,13 +378,13 @@ func RegisterAuthServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 }
 
 var (
-	pattern_AuthService_SayHello_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"1", "ping"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_AuthService_SayHello_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"auth", "ping"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_AuthService_GetToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"token", "get"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_AuthService_GetToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"auth", "token", "get"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_AuthService_AuthenticateToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"token", "auth"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_AuthService_AuthenticateToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 0}, []string{"auth", "token"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_AuthService_RefreshToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"token", "refresh"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_AuthService_RefreshToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"auth", "token", "refresh"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

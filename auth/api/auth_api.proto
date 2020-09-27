@@ -47,27 +47,27 @@ message RefreshTokenResponse {
 service AuthService {
   rpc SayHello(PingMessage) returns (PingMessage) {
     option (google.api.http) = {
-      post: "/1/ping"
+      post: "/auth/ping"
       body: "*"
     };
   }
 	rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {
      option (google.api.http) = {
-       post: "/token/get"
+       post: "/auth/token/get"
        body: "*"
      };
   };
 
   rpc AuthenticateToken(AuthenticateTokenRequest) returns (AuthenticateTokenResponse) {
      option (google.api.http) = {
-       post: "/token/auth"
+       post: "/auth/token/auth"
        body: "*"
      };
   }
 
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
      option (google.api.http) = {
-       post: "/token/refresh"
+       post: "/auth/token/refresh"
        body: "*"
      };
   }

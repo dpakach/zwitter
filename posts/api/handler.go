@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -9,11 +10,16 @@ import (
 
 	"github.com/dpakach/zwitter/pkg/auth"
 	"github.com/dpakach/zwitter/pkg/data"
+	"github.com/dpakach/zwitter/pkg/service"
 	"github.com/dpakach/zwitter/posts/api/postspb"
 	"github.com/dpakach/zwitter/users/api/userspb"
 )
 
 type Server struct{}
+
+var ConfigParseError = fmt.Errorf("Error while parsing the config")
+
+var UsersServiceNotFoundError = fmt.Errorf("Users service not configured in config")
 
 func postPb(post *data.Post, user *userspb.User) *postspb.Post {
 	return &postspb.Post{
@@ -31,15 +37,18 @@ func (s *Server) SayHello(ctx context.Context, in *postspb.PingMessage) (*postsp
 
 func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) (*postspb.CreatePostResponse, error) {
 	ts := time.Now().Unix()
+
 	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
 	if !ok {
 		return nil, errors.New("Invalid userid")
 	}
 
-	conn, cl := auth.NewUsersClient()
-	defer conn.Close()
+	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
+	if !ok {
+		return nil, fmt.Errorf("Not configured properly")
+	}
 
-	resp, err := cl.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: user.Id})
+	resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: user.Id})
 	if err != nil {
 		return nil, err
 	}
@@ -55,15 +64,17 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 }
 
 func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.GetPostsResponse, error) {
-	conn, cl := auth.NewUsersClient()
-	defer conn.Close()
+	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
+	if !ok {
+		return nil, fmt.Errorf("Not configured properly")
+	}
 
 	posts := data.PostStore
 
 	result := []*postspb.Post{}
 
 	for _, post := range posts.Posts {
-		resp, err := cl.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
+		resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
 		if err != nil {
 			return nil, errors.New("Failed while retriving users")
 		}
@@ -82,10 +93,12 @@ func (s *Server) GetPost(ctx context.Context, in *postspb.GetPostRequest) (*post
 		return nil, errors.New("Could not find the post")
 	}
 
-	conn, cl := auth.NewUsersClient()
-	defer conn.Close()
+	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
+	if !ok {
+		return nil, fmt.Errorf("Not configured properly")
+	}
 
-	resp, err := cl.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
+	resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
 	if err != nil {
 		return nil, errors.New("Failed while retriving user")
 	}

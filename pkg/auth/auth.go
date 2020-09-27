@@ -7,18 +7,14 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dpakach/zwitter/auth/api/authpb"
 	"github.com/dpakach/zwitter/pkg/data"
 	"github.com/dpakach/zwitter/users/api/userspb"
-
-	"google.golang.org/grpc/credentials"
 )
 
 var refreshTokens = map[string]string{}
@@ -27,6 +23,9 @@ type contextKey int
 
 const (
 	ClientIDKey contextKey = iota
+	EndpointKey
+	ConfigKey
+	ServiceKey
 )
 
 type UserMetaData struct {
@@ -81,43 +80,24 @@ func UUID() (string, error) {
 }
 
 func CredMatcher(headerName string) (mdName string, ok bool) {
-	if headerName == "Login" || headerName == "Password" {
+	if headerName == "Login" || headerName == "Password" || headerName == "Token" {
+		return headerName, true
+	}
+	if headerName == "Token" {
 		return headerName, true
 	}
 	return "", false
 }
 
-func AuthenticateClient(ctx context.Context) (*authpb.User, error) {
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		token := strings.Join(md["token"], "")
-		if token == "" {
-			return nil, fmt.Errorf("Failed to authenticate client: Token not found in the request")
-		}
-		conn, cl := NewAuthClient()
-		defer conn.Close()
-
-		resp, err := cl.AuthenticateToken(context.Background(), &authpb.AuthenticateTokenRequest{Token: token})
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to authenticate client: %v", err)
-		}
-
-		log.Printf("authenticated client: %s", resp.User.Username)
-		return resp.User, nil
-	}
-
-	return nil, fmt.Errorf("missing credentials")
-}
-
-func NewUsersClient() (*grpc.ClientConn, userspb.UsersServiceClient) {
+func NewUsersClient(usersEndpoint string) (*grpc.ClientConn, userspb.UsersServiceClient) {
 	var conn *grpc.ClientConn
 
-	creds, err := credentials.NewClientTLSFromFile("cert/server.crt", "grpcserver")
-	if err != nil {
-		log.Fatalf("could not load tls cert: %s", err)
-	}
+	// creds, err := credentials.NewClientTLSFromFile("cert/server.crt", "grpcserver")
+	// if err != nil {
+	// 	log.Fatalf("could not load tls cert: %s", err)
+	// }
 
-	conn, err = grpc.Dial(":8888", grpc.WithTransportCredentials(creds))
+	conn, err := grpc.Dial(usersEndpoint, grpc.WithInsecure()) //(creds))
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
@@ -127,15 +107,14 @@ func NewUsersClient() (*grpc.ClientConn, userspb.UsersServiceClient) {
 	return conn, c
 }
 
-func NewAuthClient() (*grpc.ClientConn, authpb.AuthServiceClient) {
+func NewAuthClient(authEndpoint string) (*grpc.ClientConn, authpb.AuthServiceClient) {
 	var conn *grpc.ClientConn
+	// creds, err := credentials.NewClientTLSFromFile("cert/server.crt", "grpcserver")
+	// if err != nil {
+	// 	log.Fatalf("could not load tls cert: %s", err)
+	// }
 
-	creds, err := credentials.NewClientTLSFromFile("cert/server.crt", "grpcserver")
-	if err != nil {
-		log.Fatalf("could not load tls cert: %s", err)
-	}
-
-	conn, err = grpc.Dial(":9999", grpc.WithTransportCredentials(creds))
+	conn, err := grpc.Dial(authEndpoint, grpc.WithInsecure()) //WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
@@ -208,7 +187,7 @@ func CreateToken(user data.User) (string, error) {
 	atClaims["authorized"] = true
 	atClaims["user_id"] = user.ID
 	atClaims["username"] = user.Username
-	atClaims["exp"] = time.Now().Add(time.Minute * 1).Unix()
+	atClaims["exp"] = time.Now().Add(time.Minute * 60).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))

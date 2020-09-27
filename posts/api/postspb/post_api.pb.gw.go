@@ -378,13 +378,13 @@ func RegisterPostsServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 }
 
 var (
-	pattern_PostsService_SayHello_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"1", "ping"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_PostsService_SayHello_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"posts", "ping"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_PostsService_CreatePost_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"posts", "create"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_PostsService_GetPosts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"posts", "get"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_PostsService_GetPost_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"post", "get"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_PostsService_GetPost_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"posts", "get", "id"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

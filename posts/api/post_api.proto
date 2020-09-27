@@ -46,7 +46,7 @@ message GetPostResponse {
 service PostsService {
   rpc SayHello(PingMessage) returns (PingMessage) {
     option (google.api.http) = {
-      post: "/1/ping"
+      post: "/posts/ping"
       body: "*"
     };
   }
@@ -64,7 +64,7 @@ service PostsService {
   };
 	rpc GetPost(GetPostRequest) returns (GetPostResponse) {
      option (google.api.http) = {
-       post: "/post/get"
+       post: "/posts/get/id"
        body: "*"
      };
   };

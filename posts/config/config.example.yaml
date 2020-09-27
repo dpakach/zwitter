@@ -1,0 +1,7 @@
+Server:
+  Name: Auth
+  GrpcAddr: localhost:7777
+  RestAddr: localhost:7778
+  CertFile: cert/server.crt
+  KeyFile: cert/server.key
+  ServerName: grpcserver

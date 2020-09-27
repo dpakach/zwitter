@@ -55,7 +55,7 @@ message AuthenticateResponse {
 service UsersService {
   rpc SayHello(PingMessage) returns (PingMessage) {
     option (google.api.http) = {
-      post: "/1/ping"
+      post: "/users/ping"
       body: "*"
     };
   }
@@ -73,19 +73,19 @@ service UsersService {
   };
 	rpc GetUser(GetUserRequest) returns (GetUserResponse) {
      option (google.api.http) = {
-       post: "/user/get"
+       post: "/users/username"
        body: "*"
      };
   };
 	rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
      option (google.api.http) = {
-       post: "/auth"
+       post: "/users/auth"
        body: "*"
      };
   };
   rpc GetUserByID(GetUserByIDRequest) returns (GetUserResponse) {
      option (google.api.http) = {
-       post: "/auth"
+       post: "/users/id"
        body: "*"
      };
   }
