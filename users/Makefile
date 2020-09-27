@@ -13,6 +13,7 @@ all: server client
 
 api/userspb/api.pb.go: api/users_api.proto
 	@protoc -I api/ \
+		-I/usr/local/include \
 		-I${GOPATH}/src \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 		--go_out=plugins=grpc:api \
@@ -20,6 +21,7 @@ api/userspb/api.pb.go: api/users_api.proto
 
 api/userspb/api.pb.gw.go: api/users_api.proto
 	@protoc -I api/ \
+		-I/usr/local/include \
 		-I${GOPATH}/src \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 		--grpc-gateway_out=logtostderr=true:api \
