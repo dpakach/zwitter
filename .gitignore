@@ -1,4 +1,7 @@
 build/
 bin/
-**/cert/*
-!**/cert/.gitkeep
+service/cert/*
+!service/cert/.gitkeep
+
+*/config/*
+!*/config/config.example.yaml
