@@ -1,0 +1,64 @@
+name: Build-and-test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.12
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
+
+    - name: Get dependencies
+      run: |
+        go env GOPATH
+        export GOPATH=$HOME/go
+        go get -v -t -d ./...
+        go get -u golang.org/x/lint/golint
+        go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+        go install github.com/golang/protobuf/protoc-gen-go
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+        fi
+
+    - name: fmt
+      run: diff -u <(echo -n) <(gofmt -d ./)
+
+    #- name: Build-Auth
+      #run: |
+        #export GOPATH=$HOME/go
+        #cd auth
+        #make
+        #cd ..
+
+    #- name: Build-Posts
+      #run: |
+        #cd posts
+        #make
+        #cd ..
+
+    #- name: Build-Users
+      #run: |
+        #cd users
+        #make
+        #..
+
+    - name: Test
+      run: go test -v ./...
