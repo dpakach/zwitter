@@ -23,10 +23,11 @@ var UsersServiceNotFoundError = fmt.Errorf("Users service not configured in conf
 
 func postPb(post *data.Post, user *userspb.User) *postspb.Post {
 	return &postspb.Post{
-		Id:      post.ID,
-		Text:    post.Title,
-		Created: post.Created,
-		Author:  &postspb.User{Id: user.Id, Username: user.Username},
+		Id:       post.ID,
+		Text:     post.Title,
+		Created:  post.Created,
+		Author:   &postspb.User{Id: user.Id, Username: user.Username},
+		Parentid: post.ParentId,
 	}
 }
 
@@ -53,7 +54,14 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 		return nil, err
 	}
 
-	post := &data.Post{Title: in.GetText(), Created: int64(ts)}
+	parentid := in.GetParentid()
+	if parentid != 0 {
+		if parent := data.PostStore.GetByID(parentid); parent == nil {
+			return nil, fmt.Errorf("Could not find the parent")
+		}
+	}
+
+	post := &data.Post{Title: in.GetText(), Created: int64(ts), ParentId: parentid}
 	post.Author = resp.User.Id
 
 	data.PostStore.AddDbList(post)
@@ -104,5 +112,33 @@ func (s *Server) GetPost(ctx context.Context, in *postspb.GetPostRequest) (*post
 	}
 	return &postspb.GetPostResponse{
 		Post: postPb(post, resp.User),
+	}, nil
+}
+
+func (s *Server) GetPostChilds(ctx context.Context, in *postspb.GetPostRequest) (*postspb.GetPostsResponse, error) {
+	post := data.PostStore.GetByID(in.Id)
+
+	if post == nil {
+		return nil, errors.New("Could not find the post")
+	}
+
+	childPosts := data.PostStore.GetPostChilds(in.Id)
+
+	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
+	if !ok {
+		return nil, fmt.Errorf("Not configured properly")
+	}
+
+	result := []*postspb.Post{}
+	for _, post := range childPosts {
+		resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
+		if err != nil {
+			return nil, errors.New("Failed while retriving user")
+		}
+		result = append(result, postPb(&post, resp.User))
+	}
+
+	return &postspb.GetPostsResponse{
+		Posts: result,
 	}, nil
 }

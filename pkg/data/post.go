@@ -33,6 +33,16 @@ func (p *Posts) GetByID(id int64) *Post {
 	return nil
 }
 
+func (p *Posts) GetPostChilds(id int64) []Post {
+	posts := []Post{}
+	for _, item := range p.Posts {
+		if item.ParentId == int64(id) {
+			posts = append(posts, item)
+		}
+	}
+	return posts
+}
+
 // NewID returns new ID for the new Post
 func (p *Posts) NewID() int64 {
 	id := int64(0)
@@ -46,10 +56,11 @@ func (p *Posts) NewID() int64 {
 
 // Post type for a Post Instance
 type Post struct {
-	ID      int64  `json:"id"`
-	Title   string `json:"title"`
-	Created int64  `json:"created"`
-	Author  int64  `json:"author"`
+	ID       int64  `json:"id"`
+	Title    string `json:"title"`
+	Created  int64  `json:"created"`
+	Author   int64  `json:"author"`
+	ParentId int64  `json:"parentid"`
 }
 
 // GetID returns ID of the Post
