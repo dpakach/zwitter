@@ -1,6 +1,6 @@
+---
 version: "3.7"
 services:
-
   front-envoy:
     build: .
     networks:
@@ -15,13 +15,14 @@ services:
       - "8001:8001"
 
   auth:
-    image: zwitter-auth
+    image: zwiter/auth:1.0
     networks:
       envoymesh:
         aliases:
           - auth
     environment:
       GODEBUG: x509ignoreCN=0
+      SERVICE_NAME: auth
     volumes:
       - ./auth/config:/config
       - ./auth/bin:/zwitter-bin
@@ -30,13 +31,14 @@ services:
       - "9999"
 
   posts:
-    image: zwitter-posts
+    image: zwiter/posts:1.0
     networks:
       envoymesh:
         aliases:
           - posts
     environment:
       GODEBUG: x509ignoreCN=0
+      SERVICE_NAME: posts
     volumes:
       - ./posts/config:/config
       - ./posts/bin:/zwitter-bin
@@ -45,13 +47,14 @@ services:
       - "7777"
 
   users:
-    image: zwitter-users 
+    image: zwiter/users:1.0
     networks:
       envoymesh:
         aliases:
           - users
     environment:
       GODEBUG: x509ignoreCN=0
+      SERVICE_NAME: users
     volumes:
       - ./users/config:/config
       - ./users/bin:/zwitter-bin
