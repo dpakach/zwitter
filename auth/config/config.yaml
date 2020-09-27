@@ -1,11 +1,14 @@
 Server:
   Name: Auth
-  GrpcAddr: localhost:9999
-  RestAddr: localhost:9990
+  GrpcAddr: 0.0.0.0:9999
+  RestAddr: 0.0.0.0:9990
   CertFile: ./cert/server.crt
   KeyFile: ./cert/server.key
   ServerName: grpcserver
   Nodes:
+    - Name: Auth
+      Host: auth
+      Port: 9999
     - Name: Posts
       Host: posts
       Port: 7777

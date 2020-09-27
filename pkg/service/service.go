@@ -24,7 +24,7 @@ import (
 )
 
 type Service struct {
-	Config 			 *config.ServiceConfig
+	Config             *config.ServiceConfig
 	AuthRPCs           []string
 	RPCBasePath        string
 	RegisterGrpcServer func(*grpc.Server)
@@ -34,8 +34,7 @@ type Service struct {
 	AuthServiceClient  authpb.AuthServiceClient
 }
 
-
-func (s *Service)AuthenticateClient(ctx context.Context) (*authpb.User, error) {
+func (s *Service) AuthenticateClient(ctx context.Context) (*authpb.User, error) {
 	log.Printf("Authenticating client")
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		token := strings.Join(md["token"], "")
@@ -64,7 +63,6 @@ func (s *Service) AuthInterceptor(ctx context.Context, req interface{}, info *gr
 			if err != nil {
 				return nil, err
 			}
-
 			ctx = context.WithValue(ctx, auth.ClientIDKey, &auth.UserMetaData{Id: user.Id, Username: user.Username})
 			return handler(ctx, req)
 		}

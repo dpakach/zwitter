@@ -20,8 +20,14 @@ services:
       envoymesh:
         aliases:
           - auth
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./auth/config:/config
+      - ./auth/bin:/zwitter-bin
     expose:
       - "8000"
+      - "9999"
 
   posts:
     image: zwitter-posts
@@ -29,8 +35,14 @@ services:
       envoymesh:
         aliases:
           - posts
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./posts/config:/config
+      - ./posts/bin:/zwitter-bin
     expose:
       - "8000"
+      - "7777"
 
   users:
     image: zwitter-users 
@@ -38,8 +50,14 @@ services:
       envoymesh:
         aliases:
           - users
+    environment:
+      GODEBUG: x509ignoreCN=0
+    volumes:
+      - ./users/config:/config
+      - ./users/bin:/zwitter-bin
     expose:
       - "8000"
+      - "8888"
 
 networks:
   envoymesh: {}

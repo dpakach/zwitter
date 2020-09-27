@@ -43,7 +43,7 @@ clean: ## Remove previous builds
 	@rm -rf $(SERVER_OUT) $(CLIENT_OUT)
 
 docker-build:
-	docker build -t zwiter-auth:$(VERSION) --build-arg service_name=auth -f ../service/Dockerfile  .. --no-cache
+	docker build -t zwiter/auth:$(VERSION) --build-arg service_name=auth -f ../service/Dockerfile  .. --no-cache
 
 docker-run: docker-build
 	docker run --rm -it --name=z-auth --network=host zwitter-auth

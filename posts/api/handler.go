@@ -37,6 +37,7 @@ func (s *Server) SayHello(ctx context.Context, in *postspb.PingMessage) (*postsp
 
 func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) (*postspb.CreatePostResponse, error) {
 	ts := time.Now().Unix()
+
 	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
 	if !ok {
 		return nil, errors.New("Invalid userid")
@@ -44,7 +45,7 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
-		return nil , fmt.Errorf("Not configured properly")
+		return nil, fmt.Errorf("Not configured properly")
 	}
 
 	resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: user.Id})
@@ -65,7 +66,7 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.GetPostsResponse, error) {
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
-		return nil , fmt.Errorf("Not configured properly")
+		return nil, fmt.Errorf("Not configured properly")
 	}
 
 	posts := data.PostStore
@@ -94,7 +95,7 @@ func (s *Server) GetPost(ctx context.Context, in *postspb.GetPostRequest) (*post
 
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
-		return nil , fmt.Errorf("Not configured properly")
+		return nil, fmt.Errorf("Not configured properly")
 	}
 
 	resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})

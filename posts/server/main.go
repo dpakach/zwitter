@@ -17,7 +17,7 @@ func main() {
 	cfg, err := config.NewServerconfig("config/config.yaml")
 
 	if err != nil {
-		fmt.Println(err)
+		panic(fmt.Errorf("Failed to read config: %s", err))
 	}
 
 	err, UsersEndpoint := cfg.GetNodeAddr("Users")
@@ -44,7 +44,8 @@ func main() {
 		},
 		RegisterRestServer: postspb.RegisterPostsServiceHandlerFromEndpoint,
 		UsersServiceClient: UsersClient,
-		AuthServiceClient: AuthClient,
+		AuthServiceClient:  AuthClient,
+		RPCBasePath:        "/postspb.PostsService/",
 	}
 
 	service.Start()

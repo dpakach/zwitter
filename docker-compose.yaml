@@ -2,11 +2,10 @@
 version: "3.7"
 services:
   posts:
-    image: zwiter-posts
+    image: zwiter/posts:1.0
     ports:
       - "7777:7777"
       - "7778:7778"
-    network_mode: host
     environment:
       GODEBUG: x509ignoreCN=0
     volumes:
@@ -14,11 +13,10 @@ services:
       - ./posts/bin:/zwitter-bin
 
   auth:
-    image: zwiter-auth
+    image: zwiter/auth:1.0
     ports:
       - "9990:9990"
       - "9999:9999"
-    network_mode: host
     environment:
       GODEBUG: x509ignoreCN=0
     volumes:
@@ -26,11 +24,10 @@ services:
       - ./auth/bin:/zwitter-bin
 
   users:
-    image: zwiter-users 
+    image: zwiter/users:1.0
     ports:
       - "8889:8889"
       - "8888:8888"
-    network_mode: host
     environment:
       GODEBUG: x509ignoreCN=0
     volumes:

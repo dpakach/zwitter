@@ -114,7 +114,7 @@ func NewAuthClient(authEndpoint string) (*grpc.ClientConn, authpb.AuthServiceCli
 	// 	log.Fatalf("could not load tls cert: %s", err)
 	// }
 
-	conn, err := grpc.Dial(authEndpoint, grpc.WithInsecure())//WithTransportCredentials(creds))
+	conn, err := grpc.Dial(authEndpoint, grpc.WithInsecure()) //WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
@@ -187,7 +187,7 @@ func CreateToken(user data.User) (string, error) {
 	atClaims["authorized"] = true
 	atClaims["user_id"] = user.ID
 	atClaims["username"] = user.Username
-	atClaims["exp"] = time.Now().Add(time.Minute * 1).Unix()
+	atClaims["exp"] = time.Now().Add(time.Minute * 60).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))

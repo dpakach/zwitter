@@ -27,7 +27,7 @@ func (s *Server) SayHello(ctx context.Context, in *authpb.PingMessage) (*authpb.
 func (s *Server) GetToken(ctx context.Context, in *authpb.GetTokenRequest) (*authpb.GetTokenResponse, error) {
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
-		return nil , fmt.Errorf("Not configured properly")
+		return nil, fmt.Errorf("Not configured properly")
 	}
 
 	resp, err := svc.UsersServiceClient.Authenticate(context.Background(), &userspb.AuthenticateRequest{Username: in.Username, Password: in.Password})

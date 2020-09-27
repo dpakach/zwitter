@@ -20,9 +20,8 @@ func main() {
 	cfg, err := config.NewServerconfig("config/config.yaml")
 
 	if err != nil {
-		fmt.Println(err)
+		panic(fmt.Errorf("Failed to read config: %s", err))
 	}
-
 
 	err, AuthEndpoint := cfg.GetNodeAddr("Auth")
 	if err != nil {
@@ -41,6 +40,7 @@ func main() {
 			return userspb.RegisterUsersServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts)
 		},
 		AuthServiceClient: AuthClient,
+		RPCBasePath:       "/userspb.UsersService/",
 	}
 
 	service.Start()
