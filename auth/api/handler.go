@@ -32,9 +32,12 @@ func (s *Server) GetToken(ctx context.Context, in *authpb.GetTokenRequest) (*aut
 
 	resp, err := svc.UsersServiceClient.Authenticate(context.Background(), &userspb.AuthenticateRequest{Username: in.Username, Password: in.Password})
 	if err != nil {
-		return nil, fmt.Errorf("Failed to authenticate user: %v", err)
+		return nil, fmt.Errorf("Failed to authenticate user: %v", err.Error())
 	}
 	log.Printf("authenticated client: %s", in.Username)
+	if !resp.Auth || resp.User == nil {
+		return nil, fmt.Errorf("Username or password didn't match %v", err.Error())
+	}
 
 	user := data.User{Username: resp.User.Username, ID: resp.User.Id, Created: resp.User.Created}
 	token, err := auth.CreateToken(user)
