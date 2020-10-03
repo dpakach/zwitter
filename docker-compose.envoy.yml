@@ -5,6 +5,8 @@ services:
     build: .
     networks:
       - envoymesh
+    volumes:
+      - ./envoy.yaml:/etc/front-envoy.yaml
     expose:
       - "8080"
       - "8443"

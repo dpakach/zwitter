@@ -2,6 +2,7 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
+  devtool: 'source-map',
   // the output bundle won't be optimized for production but suitable for development
   mode: 'development',
   // the app entry point is /src/index.js
@@ -10,7 +11,11 @@ module.exports = {
   	// the output of the webpack build will be in /dist directory
     path: path.resolve(__dirname, 'dist'),
     // the filename of the JS bundle will be bundle.js
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    publicPath: '/',
+  },
+  devServer: {
+    historyApiFallback: true,
   },
   module: {
     rules: [
