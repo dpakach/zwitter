@@ -17,6 +17,7 @@ message Post {
   int64 created=3;
   User author=4;
   int64 parentid=5;
+  repeated Post children=6;
 }
 
 message User {

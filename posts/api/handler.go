@@ -21,13 +21,29 @@ var ConfigParseError = fmt.Errorf("Error while parsing the config")
 
 var UsersServiceNotFoundError = fmt.Errorf("Users service not configured in config")
 
-func postPb(post *data.Post, user *userspb.User) *postspb.Post {
+func postPb(ctx context.Context, post *data.Post, user *userspb.User) *postspb.Post {
+	childs := []*postspb.Post{}
+	if len(post.Children) > 0 {
+		svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
+		if !ok {
+			return nil
+		}
+
+		for _, child := range post.Children {
+			resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
+			if err != nil {
+				return nil
+			}
+			childs = append(childs, postPb(ctx, &child, resp.User))
+		}
+	}
 	return &postspb.Post{
 		Id:       post.ID,
 		Text:     post.Title,
 		Created:  post.Created,
 		Author:   &postspb.User{Id: user.Id, Username: user.Username},
 		Parentid: post.ParentId,
+		Children: childs,
 	}
 }
 
@@ -67,7 +83,7 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 	data.PostStore.AddDbList(post)
 
 	return &postspb.CreatePostResponse{
-		Post: postPb(post, resp.User),
+		Post: postPb(ctx, post, resp.User),
 	}, nil
 }
 
@@ -77,16 +93,16 @@ func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.
 		return nil, fmt.Errorf("Not configured properly")
 	}
 
-	posts := data.PostStore
+	posts := data.PostStore.GetPosts()
 
 	result := []*postspb.Post{}
 
-	for _, post := range posts.Posts {
+	for _, post := range posts {
 		resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
 		if err != nil {
 			return nil, errors.New("Failed while retriving users")
 		}
-		result = append(result, postPb(&post, resp.User))
+		result = append(result, postPb(ctx, &post, resp.User))
 	}
 
 	return &postspb.GetPostsResponse{
@@ -111,7 +127,7 @@ func (s *Server) GetPost(ctx context.Context, in *postspb.GetPostRequest) (*post
 		return nil, errors.New("Failed while retriving user")
 	}
 	return &postspb.GetPostResponse{
-		Post: postPb(post, resp.User),
+		Post: postPb(ctx, post, resp.User),
 	}, nil
 }
 
@@ -135,7 +151,7 @@ func (s *Server) GetPostChilds(ctx context.Context, in *postspb.GetPostRequest) 
 		if err != nil {
 			return nil, errors.New("Failed while retriving user")
 		}
-		result = append(result, postPb(&post, resp.User))
+		result = append(result, postPb(ctx, &post, resp.User))
 	}
 
 	return &postspb.GetPostsResponse{

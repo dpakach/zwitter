@@ -3,10 +3,12 @@ import { BrowserRouter as Router, Switch, Routes, Route, Link } from 'react-rout
 import Posts from "./Posts";
 import Login from './Login'
 import Signup from './Signup'
+import {sendRequest} from "./helpers/request"
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [tokens, setTokens] = useState({})
+  const [message, setMessage] = useState("")
 
   useEffect(() => {
     const tokensString = window.localStorage.getItem("tokens")
@@ -16,12 +18,26 @@ export default function App() {
     }
   }, [])
 
+  function handleLogout() {
+    return sendRequest("/auth/logout", {"token": tokens.token})
+      .then(res => res.json())
+      .then(() => {
+        setMessage("Logged out successfully")
+      }, (error) => {
+        setMessage("Error: " + error.message)
+      })
+  }
+
   return (
     <Router>
       <h1>Zwitter</h1>
       <div>
         <Link to="/">Home </Link>
-        {loggedIn ? <></> : (
+        {loggedIn ? (
+          <>
+            <Link to="#" onClick={handleLogout}> Logout </Link>
+          </>
+        ) : (
           <>
           <Link to="/login">Login </Link>
           <Link to="/signup">Signup </Link>
