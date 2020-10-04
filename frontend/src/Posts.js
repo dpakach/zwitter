@@ -1,17 +1,14 @@
 import React, {useState, useEffect} from "react"
-import {baseUrl} from "./const.js"
 import {sendRequest} from "./helpers/request"
+import Post from "./Post"
 
 function Posts(props) {
   const [postText, setPostText] = useState("")
   const [posts, setPosts] = useState([])
   const [message, setMessage] = useState("")
 
-  const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-  const timeOptions = {  };
-
   useEffect(() => {
-    fetch(`${baseUrl}/posts/get`, {method: "POST"})
+    sendRequest("/posts/get")
     .then(res => res.json())
     .then(json => {
       setPosts(json.posts.reverse() || [])
@@ -42,19 +39,7 @@ function Posts(props) {
           <input type="submit" value="Submit" />
         </form>
       }
-      {posts.map(post => {
-        let created = new Date(post.created * 1000)
-        const format = created.toLocaleTimeString("en-US", dateOptions)
-        return (<div key={post.id}>
-          {post.text}
-          <br/>
-          <b>@{post.author.username}</b>
-          <br/>
-          {format}
-          <br/>
-          <br/>
-        </div>)
-      })}
+      {posts.map(post => <Post post={post} key={post.id} tokens={props.tokens} level={0} {...props} />)}
     </>
   )
 }
