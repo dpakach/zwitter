@@ -17,22 +17,47 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
   },
-  module: {
+  // add a custom index.html as the template
+  plugins: [new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'public', 'index.html') })],
+
+   module: {
     rules: [
       {
-      	// for any file with a suffix of js or jsx
-        test: /\.jsx?$/,
-        // ignore transpiling JavaScript from node_modules as it should be that state
-        exclude: /node_modules/,
-        // use the babel-loader for transpiling JavaScript to a suitable format
-        loader: 'babel-loader',
-        options: {
-          // attach the presets to the loader (most projects use .babelrc file instead)
-          presets: ["@babel/preset-env", "@babel/preset-react"]
-        }
-      }
-    ]
+        // look for .js or .jsx files
+        test: /\.(js|jsx)$/,
+        // in the `src` directory
+        exclude: /(node_modules)/,
+        use: {
+          // use babel for transpiling JavaScript files
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/react'],
+          },
+        },
+      },
+      {
+        // look for .css or .scss files
+        test: /\.(css|scss)$/,
+        // in the `src` directory
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1,
+              modules: true,
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
+      },
+    ],
   },
-  // add a custom index.html as the template
-  plugins: [new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'public', 'index.html') })]
 }

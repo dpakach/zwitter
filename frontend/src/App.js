@@ -4,6 +4,7 @@ import Posts from "./Posts";
 import Login from './Login'
 import Signup from './Signup'
 import {sendRequest} from "./helpers/request"
+import SinglePost from "./SinglePost";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false)
@@ -19,6 +20,8 @@ export default function App() {
   }, [])
 
   function handleLogout() {
+    window.localStorage.removeItem("tokens")
+    setLoggedIn(false)
     return sendRequest("/auth/logout", {"token": tokens.token})
       .then(res => res.json())
       .then(() => {
@@ -46,14 +49,19 @@ export default function App() {
       </div>
 
       <Switch>
+        <Route path="/post/:id" render={(props) => (
+          <SinglePost {...props} loggedIn={loggedIn} tokens={tokens}/>
+        )}/>
         <Route path="/login">
           <Login loggedIn={loggedIn} setTokens={setTokens} setLoggedIn={setLoggedIn} />
         </Route>
         <Route path="/signup">
           <Signup />
         </Route>
+        <Route path="/">
+          <Posts loggedIn={loggedIn} tokens={tokens} />
+        </Route>
       </Switch>
-      <Posts loggedIn={loggedIn} tokens={tokens}/>
     </Router>
   )
 }
