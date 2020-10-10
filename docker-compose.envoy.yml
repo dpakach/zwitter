@@ -7,21 +7,20 @@ services:
       - envoymesh
     volumes:
       - ./envoy.yaml:/etc/front-envoy.yaml
-    expose:
-      - "8080"
-      - "8443"
-      - "8001"
+    logging:
+      driver: none
     ports:
+      # Http Access port
       - "8080:8080"
+      # Https Access port (not implemented)
       - "8443:8443"
+      # Envoy admin
       - "8001:8001"
 
   auth:
     image: zwiter/auth:1.0
     networks:
-      envoymesh:
-        aliases:
-          - auth
+      - envoymesh
     environment:
       GODEBUG: x509ignoreCN=0
       SERVICE_NAME: auth
@@ -29,15 +28,15 @@ services:
       - ./auth/config:/config
       - ./auth/bin:/zwitter-bin
     expose:
+      # Http server runs on this port with envoy
       - "8000"
+      # gRPC server runs on this port
       - "9999"
 
   posts:
     image: zwiter/posts:1.0
     networks:
-      envoymesh:
-        aliases:
-          - posts
+      - envoymesh
     environment:
       GODEBUG: x509ignoreCN=0
       SERVICE_NAME: posts
@@ -45,15 +44,15 @@ services:
       - ./posts/config:/config
       - ./posts/bin:/zwitter-bin
     expose:
+      # Http server runs on this port with envoy
       - "8000"
+      # gRPC server runs on this port
       - "7777"
 
   users:
     image: zwiter/users:1.0
     networks:
-      envoymesh:
-        aliases:
-          - users
+      - envoymesh
     environment:
       GODEBUG: x509ignoreCN=0
       SERVICE_NAME: users
@@ -61,7 +60,9 @@ services:
       - ./users/config:/config
       - ./users/bin:/zwitter-bin
     expose:
+      # gRPC server runs on this port
       - "8000"
+      # gRPC server runs on this port
       - "8888"
 
 networks:
