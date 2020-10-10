@@ -1,4 +1,4 @@
 #!/bin/sh
 
-/zwitter-bin/server &
-envoy -c /etc/envoy.yaml --service-cluster service${SERVICE_NAME}
+envoy -c /etc/envoy.yaml --service-cluster service${SERVICE_NAME} &> /dev/null &
+/zwitter-bin/server
