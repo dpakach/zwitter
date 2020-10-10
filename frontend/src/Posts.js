@@ -23,6 +23,7 @@ function Posts(props) {
       .then(res => res.json())
       .then((json) => {
         setPosts([json.post, ...posts])
+        setPostText("")
         setMessage("Successfully created a post")
       }, (error) => {
         setMessage("Error: " + error.message)
@@ -39,7 +40,7 @@ function Posts(props) {
           <input type="submit" value="Submit" />
         </form>
       }
-      {posts.map(post => <Post post={post} key={post.id} tokens={props.tokens} level={0} {...props} />)}
+      {posts.map(post => <Post post={post} key={post.id} tokens={props.tokens} level={0} clickable={true} {...props} />)}
     </>
   )
 }

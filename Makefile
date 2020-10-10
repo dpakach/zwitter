@@ -12,9 +12,9 @@ restart-service:
 build-all:
 	cd auth && \
 	make && make docker-build && \
-	cd posts && \
+	cd ../posts && \
 	make && make docker-build && \
-	cd users && \
+	cd ../users && \
 	make && make docker-build
 
 docker-run:
@@ -26,6 +26,12 @@ envoy-run:
 frontend-watch:
 	cd frontend && \
 	yarn start
+
+logs:
+	docker-compose -f ./docker-compose.envoy.yml logs --tail=250 -ft $(SERVICE)
+
+stop:
+	docker-compose -f ./docker-compose.envoy.yml down
 
 dev: envoy-run frontend-watch
 

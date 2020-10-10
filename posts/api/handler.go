@@ -111,7 +111,7 @@ func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.
 }
 
 func (s *Server) GetPost(ctx context.Context, in *postspb.GetPostRequest) (*postspb.GetPostResponse, error) {
-	post := data.PostStore.GetByID(in.Id)
+	post := data.PostStore.GetPostWithChilds(in.Id)
 
 	if post == nil {
 		return nil, errors.New("Could not find the post")
