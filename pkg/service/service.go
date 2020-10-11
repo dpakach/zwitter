@@ -34,22 +34,17 @@ type Service struct {
 	AuthServiceClient  authpb.AuthServiceClient
 }
 
-func (s *Service) AuthenticateClient(ctx context.Context) (*authpb.User, error) {
-	log.Printf("Authenticating client")
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		token := strings.Join(md["token"], "")
-		if token == "" {
-			return nil, fmt.Errorf("Failed to authenticate client: Token not found in the request")
-		}
-		resp, err := s.AuthServiceClient.AuthenticateToken(context.Background(), &authpb.AuthenticateTokenRequest{Token: token})
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to authenticate client: %v", err)
-		}
-		log.Printf("authenticated client: %s", resp.User.Username)
-		return resp.User, nil
+func (s *Service) AuthenticateClient(token string) (*authpb.User, error) {
+	if token == "" {
+		return nil, fmt.Errorf("Failed to authenticate client: Token not found in the request")
 	}
-	return nil, fmt.Errorf("missing credentials")
+	resp, err := s.AuthServiceClient.AuthenticateToken(context.Background(), &authpb.AuthenticateTokenRequest{Token: token})
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to authenticate client: %v", err)
+	}
+	log.Printf("authenticated client: %s", resp.User.Username)
+	return resp.User, nil
 }
 
 func (s *Service) AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -57,15 +52,28 @@ func (s *Service) AuthInterceptor(ctx context.Context, req interface{}, info *gr
 
 	ctx = context.WithValue(ctx, auth.ServiceKey, s)
 
-	for _, method := range s.AuthRPCs {
-		if info.FullMethod == s.RPCBasePath+method {
-			user, err := s.AuthenticateClient(ctx)
-			if err != nil {
-				return nil, err
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		token := strings.Join(md["token"], "")
+		for _, method := range s.AuthRPCs {
+			if info.FullMethod == s.RPCBasePath+method {
+				if token == "" {
+					return nil, fmt.Errorf("Failed to authenticate client: Token not found in the request")
+				}
+				user, err := s.AuthenticateClient(token)
+				if err != nil {
+					return nil, err
+				}
+				ctx = context.WithValue(ctx, auth.ClientIDKey, &auth.UserMetaData{Id: user.Id, Username: user.Username})
+				return handler(ctx, req)
 			}
-			ctx = context.WithValue(ctx, auth.ClientIDKey, &auth.UserMetaData{Id: user.Id, Username: user.Username})
-			return handler(ctx, req)
 		}
+
+		// Ignore error for non auth RPCs
+		user, _ := s.AuthenticateClient(token)
+		if user != nil {
+			ctx = context.WithValue(ctx, auth.ClientIDKey, &auth.UserMetaData{Id: user.Id, Username: user.Username})
+		}
+		return handler(ctx, req)
 	}
 
 	return handler(ctx, req)

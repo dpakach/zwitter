@@ -60,14 +60,14 @@ func (p *Posts) GetPostChilds(id int64) []Post {
 }
 
 func (p *Posts) GetPostWithChilds(id int64) *Post {
-  post := p.GetByID(id)
-  if post != nil {
-    childs := p.GetPostChilds(id)
-    fmt.Println(childs)
-    fmt.Println(post)
-    post.Children = childs
-  }
-  return post
+	post := p.GetByID(id)
+	if post != nil {
+		childs := p.GetPostChilds(id)
+		fmt.Println(childs)
+		fmt.Println(post)
+		post.Children = childs
+	}
+	return post
 }
 
 // NewID returns new ID for the new Post

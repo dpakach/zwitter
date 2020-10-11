@@ -31,9 +31,27 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
       })
   }
 
+  function likePost() {
+    return sendRequest("/posts/id/like", {post: post.id}, {"token": tokens.token})
+      .then(res => res.json())
+      .then(() => {
+        setReplyText("")
+        if (!post.liked) {
+          setPost({...post, likes: parseInt(post.likes || 0) + 1, liked: true})
+        } else {
+          setPost({...post, likes: parseInt(post.likes) - 1, liked: false})
+        }
+      }, (error) => {
+        setMessage("Error: " + error.message)
+      })
+  }
+
   return(
-   <div style={{marginLeft: `${level === 0 ? 0 : 20}px`}}>
-      <br/>
+   <div style={{
+     marginLeft: `${level === 0 ? 0 : 20}px`,
+     borderLeft: level === 0 ? "" : "2px solid #333",
+     paddingLeft: "10px"
+   }}>
       {clickable ? 
         (
           <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${post.id}`}>
@@ -50,9 +68,18 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
       <br/>
 
       {!loggedIn || (
-        <button onClick={() => setReplyShown(!replyShown)}>reply</button>
+        <>
+          <button onClick={() => setReplyShown(!replyShown)}>reply</button>
+          <button
+            onClick={likePost}
+            style={post.liked ? {
+              color: "#ccc",
+              backgroundColor: "#3f6ea1"
+            } : {}}
+          >Like</button>
+        </>
       )}
-
+      <p>Likes: {post.likes || 0}</p>
       {!replyShown || (
         <>
           <p>{message}</p>
@@ -63,10 +90,9 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
         </>
       )}
 
-      {post.children && post.children.map(child => {
-          return <Post tokens={tokens} post={child} key={child.id} level={level + 1} loggedIn={loggedIn} clickable={true} />
-      })}
-      <br/>
+      {post.children && post.children.map(child => (
+          <Post tokens={tokens} post={child} key={child.id} level={level + 1} loggedIn={loggedIn} clickable={true} />
+      ))}
     </div>
   )
 }

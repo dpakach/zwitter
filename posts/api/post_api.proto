@@ -18,6 +18,8 @@ message Post {
   User author=4;
   int64 parentid=5;
   repeated Post children=6;
+  int64 likes=7;
+  bool liked=8;
 }
 
 message User {
@@ -44,6 +46,10 @@ message GetPostRequest {
 
 message GetPostResponse {
   Post post=1;
+}
+
+message LikeRequest {
+  int64 post=1;
 }
 
 service PostsService {
@@ -74,6 +80,12 @@ service PostsService {
 	rpc GetPostChilds(GetPostRequest) returns (GetPostsResponse) {
      option (google.api.http) = {
        post: "/posts/id/childs"
+       body: "*"
+     };
+  };
+  rpc LikePost(LikeRequest) returns (EmptyData) {
+     option (google.api.http) = {
+       post: "/posts/id/like"
        body: "*"
      };
   };

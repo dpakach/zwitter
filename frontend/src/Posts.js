@@ -3,15 +3,16 @@ import {sendRequest} from "./helpers/request"
 import Post from "./Post"
 
 function Posts(props) {
+  const {loggedIn, tokens} = props
   const [postText, setPostText] = useState("")
   const [posts, setPosts] = useState([])
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    sendRequest("/posts/get")
+    sendRequest("/posts/get", {}, loggedIn ? {"token": tokens.token} : {})
     .then(res => res.json())
     .then(json => {
-      setPosts(json.posts.reverse() || [])
+      setPosts(json.posts ? json.posts.reverse() : [])
     }, (error) => {
       setMessage("Could not Get Posts: " + error.message)
     })
