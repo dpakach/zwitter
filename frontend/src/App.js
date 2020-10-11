@@ -7,17 +7,10 @@ import {sendRequest} from "./helpers/request"
 import SinglePost from "./SinglePost";
 
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [tokens, setTokens] = useState({})
+  const tokensString = window.localStorage.getItem("tokens")
+  const [tokens, setTokens] = useState(JSON.parse(tokensString))
+  const [loggedIn, setLoggedIn] = useState(tokensString != null)
   const [message, setMessage] = useState("")
-
-  useEffect(() => {
-    const tokensString = window.localStorage.getItem("tokens")
-    if (tokensString) {
-      setTokens(JSON.parse(tokensString))
-      setLoggedIn(true)
-    }
-  }, [])
 
   function handleLogout() {
     window.localStorage.removeItem("tokens")
@@ -25,6 +18,8 @@ export default function App() {
     return sendRequest("/auth/logout", {"token": tokens.token})
       .then(res => res.json())
       .then(() => {
+        setTokens({})
+        setLoggedIn(false)
         setMessage("Logged out successfully")
       }, (error) => {
         setMessage("Error: " + error.message)
@@ -34,6 +29,9 @@ export default function App() {
   return (
     <Router>
       <h1>Zwitter</h1>
+      {
+        loggedIn && <p>Logged in as <b>@{"<username>"}</b></p>
+      }
       <div>
         <Link to="/">Home </Link>
         {loggedIn ? (
@@ -56,11 +54,11 @@ export default function App() {
           <Login loggedIn={loggedIn} setTokens={setTokens} setLoggedIn={setLoggedIn} />
         </Route>
         <Route path="/signup">
-          <Signup />
+          <Signup loggedIn={loggedIn} />
         </Route>
-        <Route path="/">
-          <Posts loggedIn={loggedIn} tokens={tokens} />
-        </Route>
+        <Route path="/" render={(props) => (
+          <Posts {...props} loggedIn={loggedIn} tokens={tokens} />
+        )} />
       </Switch>
     </Router>
   )

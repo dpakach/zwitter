@@ -10,7 +10,6 @@ export default function Login(props) {
 
   function handleSubmit(e) {
     e.preventDefault()
-    console.log({username, password})
     return sendRequest("/auth/token/get", {username, password})
       .then(res => res.json())
       .then(json => {
@@ -22,7 +21,6 @@ export default function Login(props) {
           setCompleted(true)
         }, 2000)
       }, (error) => {
-        console.log(error)
         setMessage("Error: " + error.message)
       })
   }

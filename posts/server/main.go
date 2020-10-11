@@ -38,6 +38,7 @@ func main() {
 		Config: cfg,
 		AuthRPCs: []string{
 			"CreatePost",
+			"LikePost",
 		},
 		RegisterGrpcServer: func(serv *grpc.Server) {
 			postspb.RegisterPostsServiceServer(serv, &api.Server{})

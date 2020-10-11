@@ -10,7 +10,7 @@ VERSION := 1.0
 
 .PHONY: all api server client
 
-all: server client
+all: server
 
 api/authpb/api.pb.go: api/auth_api.proto
 	@protoc -I api/ \

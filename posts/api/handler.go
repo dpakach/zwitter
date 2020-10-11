@@ -22,6 +22,7 @@ var ConfigParseError = fmt.Errorf("Error while parsing the config")
 var UsersServiceNotFoundError = fmt.Errorf("Users service not configured in config")
 
 func postPb(ctx context.Context, post *data.Post, user *userspb.User) *postspb.Post {
+	userMd, _ := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
 	childs := []*postspb.Post{}
 	if len(post.Children) > 0 {
 		svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
@@ -37,14 +38,23 @@ func postPb(ctx context.Context, post *data.Post, user *userspb.User) *postspb.P
 			childs = append(childs, postPb(ctx, &child, resp.User))
 		}
 	}
-	return &postspb.Post{
+	resp := &postspb.Post{
 		Id:       post.ID,
 		Text:     post.Title,
 		Created:  post.Created,
 		Author:   &postspb.User{Id: user.Id, Username: user.Username},
 		Parentid: post.ParentId,
 		Children: childs,
+		Likes:    data.LikeStore.GetLikesCount(post.ID),
 	}
+
+	if userMd != nil {
+		userLike := data.LikeStore.GetByPostAndAuthor(post.ID, userMd.Id)
+		if userLike != nil {
+			resp.Liked = true
+		}
+	}
+	return resp
 }
 
 func (s *Server) SayHello(ctx context.Context, in *postspb.PingMessage) (*postspb.PingMessage, error) {
@@ -157,4 +167,30 @@ func (s *Server) GetPostChilds(ctx context.Context, in *postspb.GetPostRequest) 
 	return &postspb.GetPostsResponse{
 		Posts: result,
 	}, nil
+}
+
+func (s *Server) LikePost(ctx context.Context, in *postspb.LikeRequest) (*postspb.EmptyData, error) {
+	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
+	if !ok {
+		return nil, errors.New("Invalid userid")
+	}
+
+	post := data.PostStore.GetByID(in.Post)
+
+	if post == nil {
+		return nil, errors.New("Could not find the post")
+	}
+
+	like := data.LikeStore.GetByPostAndAuthor(in.Post, user.Id)
+	if like != nil {
+		err := data.LikeStore.DeleteLike(in.Post, user.Id)
+		if err != nil {
+			return nil, err
+		}
+		return &postspb.EmptyData{}, nil
+	}
+
+	data.LikeStore.AddDbList(&data.Like{Post: in.Post, Author: user.Id})
+
+	return &postspb.EmptyData{}, nil
 }

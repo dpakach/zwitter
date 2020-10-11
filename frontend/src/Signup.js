@@ -2,7 +2,7 @@ import React, {useState} from "react"
 import { Redirect } from 'react-router-dom'
 import {sendRequest} from "./helpers/request"
 
-export default function Signup() {
+export default function Signup(props) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [message, setMessage] = useState("")
@@ -10,21 +10,21 @@ export default function Signup() {
 
   function handleSubmit(e) {
     e.preventDefault()
-    console.log({username, password})
     return sendRequest("/users/create", {username, password})
       .then(res => res.json())
-      .then(json => {
+      .then(() => {
         setMessage("Success: Created User")
-        setTimeout(() => setCompleted(true), 2000)
-        console.log(json)
+        setTimeout(() => {
+          props.setLoggedIn(true)
+          setCompleted(true)
+        }, 2000)
       }, (error) => {
-        console.log(error)
         setMessage("Error: " + error.message)
       })
   }
   return (
     <>
-      {!completed || <Redirect to="/" />}
+      {!(completed || props.loggedIn) || <Redirect to="/" />}
 
       <p>{message}</p>
       <h2>Signup</h2>
