@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -32,6 +33,7 @@ type Service struct {
 	UsersServiceClient userspb.UsersServiceClient
 	PostsServiceClient postspb.PostsServiceClient
 	AuthServiceClient  authpb.AuthServiceClient
+	SwaggerFile        string
 }
 
 func (s *Service) AuthenticateClient(token string) (*authpb.User, error) {
@@ -115,7 +117,14 @@ func (s *Service) StartRESTServer(serv *http.Server) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	mux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(auth.CredMatcher))
+	fmt.Println(fmt.Sprintf("/%v/swagger.json", strings.ToLower(s.Config.Server.Name)))
+
+	mux := http.NewServeMux()
+	mux.HandleFunc(fmt.Sprintf("/%v/swagger.json", strings.ToLower(s.Config.Server.Name)), func(w http.ResponseWriter, req *http.Request) {
+		file, _ := os.Open(s.SwaggerFile)
+		io.Copy(w, file)
+	})
+	gmux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(auth.CredMatcher))
 
 	// creds, err := credentials.NewClientTLSFromFile(s.Config.Server.CertFile, s.Config.Server.ServerName)
 	// if err != nil {
@@ -126,10 +135,12 @@ func (s *Service) StartRESTServer(serv *http.Server) error {
 		// grpc.WithTransportCredentials((creds))
 		grpc.WithInsecure(),
 	}
-	err := s.RegisterRestServer(ctx, mux, s.Config.Server.GrpcAddr, opts)
+
+	err := s.RegisterRestServer(ctx, gmux, s.Config.Server.GrpcAddr, opts)
 	if err != nil {
 		return fmt.Errorf("could not register server Ping: %s", err)
 	}
+	mux.Handle("/", gmux)
 
 	log.Printf("Starting HTTP/1.1 REST server on %s", s.Config.Server.RestAddr)
 

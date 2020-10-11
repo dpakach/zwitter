@@ -1,0 +1,359 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "post_api.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/posts/create": {
+      "post": {
+        "operationId": "PostsService_CreatePost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbCreatePostResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbCreatePostRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/get": {
+      "post": {
+        "operationId": "PostsService_GetPosts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbGetPostsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbEmptyData"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/get/id": {
+      "post": {
+        "operationId": "PostsService_GetPost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbGetPostResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbGetPostRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/id/childs": {
+      "post": {
+        "operationId": "PostsService_GetPostChilds",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbGetPostsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbGetPostRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/id/like": {
+      "post": {
+        "operationId": "PostsService_LikePost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbEmptyData"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbLikeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/ping": {
+      "post": {
+        "operationId": "PostsService_SayHello",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbPingMessage"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbPingMessage"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "postspbCreatePostRequest": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "parentid": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "postspbCreatePostResponse": {
+      "type": "object",
+      "properties": {
+        "post": {
+          "$ref": "#/definitions/postspbPost"
+        }
+      }
+    },
+    "postspbEmptyData": {
+      "type": "object"
+    },
+    "postspbGetPostRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "postspbGetPostResponse": {
+      "type": "object",
+      "properties": {
+        "post": {
+          "$ref": "#/definitions/postspbPost"
+        }
+      }
+    },
+    "postspbGetPostsResponse": {
+      "type": "object",
+      "properties": {
+        "posts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/postspbPost"
+          }
+        }
+      }
+    },
+    "postspbLikeRequest": {
+      "type": "object",
+      "properties": {
+        "post": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "postspbPingMessage": {
+      "type": "object",
+      "properties": {
+        "greeting": {
+          "type": "string"
+        }
+      }
+    },
+    "postspbPost": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "text": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "int64"
+        },
+        "author": {
+          "$ref": "#/definitions/postspbUser"
+        },
+        "parentid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/postspbPost"
+          }
+        },
+        "likes": {
+          "type": "string",
+          "format": "int64"
+        },
+        "liked": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "postspbUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

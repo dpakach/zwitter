@@ -35,6 +35,7 @@ func main() {
 		RegisterRestServer: authpb.RegisterAuthServiceHandlerFromEndpoint,
 		UsersServiceClient: UsersClient,
 		RPCBasePath:        "/authpb.AuthService/",
+		SwaggerFile:        "./swagger/auth_api.swagger.json",
 	}
 
 	service.Start()

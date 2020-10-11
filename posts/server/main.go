@@ -47,6 +47,7 @@ func main() {
 		UsersServiceClient: UsersClient,
 		AuthServiceClient:  AuthClient,
 		RPCBasePath:        "/postspb.PostsService/",
+		SwaggerFile:        "./swagger/post_api.swagger.json",
 	}
 
 	service.Start()
