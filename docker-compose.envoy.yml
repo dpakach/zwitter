@@ -27,6 +27,7 @@ services:
     volumes:
       - ./auth/config:/config
       - ./auth/bin:/zwitter-bin
+      - ./auth/swagger:/swagger
     expose:
       # Http server runs on this port with envoy
       - "8000"
@@ -43,6 +44,7 @@ services:
     volumes:
       - ./posts/config:/config
       - ./posts/bin:/zwitter-bin
+      - ./posts/swagger:/swagger
     expose:
       # Http server runs on this port with envoy
       - "8000"
@@ -59,6 +61,7 @@ services:
     volumes:
       - ./users/config:/config
       - ./users/bin:/zwitter-bin
+      - ./users/swagger:/swagger
     expose:
       # gRPC server runs on this port
       - "8000"

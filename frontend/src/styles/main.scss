@@ -1,9 +1,19 @@
 body {
-  background-color: #222;
-  color: #ccc;
-  width: 900px;
-  margin: 2rem auto;
   font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.main {
+  background-color: #222 !important;
+  color: #ccc;
+  min-height: 100%;
+}
+
+.container {
+  padding: 2rem;
+  width: 900px;
+  margin: 0 auto;
 }
 
 a {
