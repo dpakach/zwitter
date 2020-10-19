@@ -46,6 +46,7 @@ func postPb(ctx context.Context, post *data.Post, user *userspb.User) *postspb.P
 		Parentid: post.ParentId,
 		Children: childs,
 		Likes:    data.LikeStore.GetLikesCount(post.ID),
+		Media:    post.Media,
 	}
 
 	if userMd != nil {
@@ -87,7 +88,7 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 		}
 	}
 
-	post := &data.Post{Title: in.GetText(), Created: int64(ts), ParentId: parentid}
+	post := &data.Post{Title: in.GetText(), Created: int64(ts), ParentId: parentid, Media: in.GetMedia()}
 	post.Author = resp.User.Id
 
 	data.PostStore.AddDbList(post)

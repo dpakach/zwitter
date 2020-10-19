@@ -22,8 +22,8 @@ static_resources:
                 - safe_regex:
                     google_re2: {}
                     regex: \*
-                allow_methods: "POST"
-                allow_headers: "token"
+                allow_methods: "POST,GET,OPTIONS,PUT,DELETE"
+                allow_headers: "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, token"
               routes:
               - match:
                   prefix: "/auth"
@@ -37,6 +37,10 @@ static_resources:
                   prefix: "/posts"
                 route:
                   cluster: posts_service
+              - match:
+                  prefix: "/media"
+                route:
+                  cluster: media_service
           http_filters:
           - name: envoy.filters.http.cors
             typed_config: {}
@@ -88,6 +92,20 @@ static_resources:
                   address: users
                   port_value: 8000
 
+    - name: media_service
+      connect_timeout: 0.25s
+      type: strict_dns
+      http2_protocol_options: {}
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: media_service
+        endpoints:
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: media
+                  port_value: 8000
 
 admin:
   access_log_path: "/dev/null"

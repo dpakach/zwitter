@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react"
-import {sendRequest} from "./helpers/request"
+import {sendRequest, sendFileUploadRequest} from "./helpers/request"
 import Post from "./Post"
 
 function Posts(props) {
@@ -18,9 +18,33 @@ function Posts(props) {
     })
   }, [])
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    return sendRequest("/posts/create", {text: postText}, {"token": props.tokens.token})
+
+    let file = null
+    let fileid
+    try {
+      const input = document.getElementById("create-post-media-input")
+      file = input.files[0]
+    } catch (e) {
+    }
+    console.log(file)
+    if (file) {
+      await sendFileUploadRequest(`/media/${file.name}`, file, {
+        token: props.tokens.token
+      })
+      .then(body => body.json())
+      .then(data => {
+        fileid = data.id
+        console.log(data)
+      })
+      if (!fileid) {
+        setMessage("Failed while trying to upload media")
+        return
+      }
+    }
+
+    return sendRequest("/posts/create", {text: postText, media: fileid}, {"token": props.tokens.token})
       .then(res => res.json())
       .then((json) => {
         setPosts([json.post, ...posts])
@@ -39,6 +63,7 @@ function Posts(props) {
         <form onSubmit={handleSubmit}>
           <textarea placeholder="Create a new post" type="text" value={postText} onChange={(e) => { setPostText(e.target.value)}} name="text" />
           <input type="submit" value="Submit" />
+          <input type="file" id="create-post-media-input" />
         </form>
       }
       {posts.map(post => <Post post={post} key={post.id} tokens={props.tokens} level={0} clickable={true} {...props} />)}

@@ -54,10 +54,10 @@ func (s *Server) GetToken(ctx context.Context, in *authpb.GetTokenRequest) (*aut
 
 func (s *Server) AuthenticateToken(ctx context.Context, in *authpb.AuthenticateTokenRequest) (*authpb.AuthenticateTokenResponse, error) {
 	user, err := auth.AuthenticateToken(in.Token)
-	if err != nil {
+	if err != nil || user == nil {
 		return nil, fmt.Errorf("Failed to authenticate token: %v", err.Error())
 	}
-	return &authpb.AuthenticateTokenResponse{User: &authpb.User{Username: user.Username, Id: user.ID}}, nil
+	return &authpb.AuthenticateTokenResponse{Auth: true, User: &authpb.User{Username: user.Username, Id: user.ID}}, nil
 }
 
 func (s *Server) RefreshToken(ctx context.Context, in *authpb.RefreshTokenRequest) (*authpb.RefreshTokenResponse, error) {

@@ -4,6 +4,8 @@ service/cert/*
 !service/cert/.gitkeep
 
 */config/*
+media/media-store/*
+!media/media-store/.gitkeep
 !*/config/config.example.yaml
 
 

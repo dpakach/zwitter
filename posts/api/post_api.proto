@@ -20,6 +20,7 @@ message Post {
   repeated Post children=6;
   int64 likes=7;
   bool liked=8;
+  string media=9;
 }
 
 message User {
@@ -30,6 +31,7 @@ message User {
 message CreatePostRequest {
 	string text=1;
   int64 parentid=2;
+  string media=3;
 }
 
 message CreatePostResponse {

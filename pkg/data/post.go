@@ -89,6 +89,7 @@ type Post struct {
 	Author   int64  `json:"author"`
 	ParentId int64  `json:"parentid"`
 	Children []Post `json:"children"`
+	Media    string `json:"media"`
 }
 
 // GetID returns ID of the Post

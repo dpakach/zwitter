@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react"
 import {sendRequest} from "./helpers/request"
 import {Link} from "react-router-dom"
+import {baseUrl} from "./const"
 
 function Post({post: p, tokens, level, loggedIn, clickable}) {
   const [replyShown, setReplyShown] = useState(false)
@@ -66,7 +67,10 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
       <br/>
       {formattedDate}
       <br/>
-
+      {post.media && (
+        <img src={`${baseUrl}/media/${post.media}`} alt={post.text} style={{width: '400px'}} />
+      )}
+      <br/>
       {!loggedIn || (
         <>
           <button onClick={() => setReplyShown(!replyShown)}>reply</button>

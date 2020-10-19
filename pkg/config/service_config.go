@@ -47,3 +47,24 @@ func NewServerconfig(configFile string) (*ServiceConfig, error) {
 
 	return sc, nil
 }
+
+type MediaServiceConfig struct {
+	ServiceConfig `yaml:"ServiceConfig"`
+	LocalStore    string `yaml:"LocalStore"`
+}
+
+func NewMediaSericeConfig(configFile string) (*MediaServiceConfig, error) {
+	f, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+
+	sc := &MediaServiceConfig{}
+
+	err = yaml.Unmarshal(f, &sc)
+	if err != nil {
+		return nil, err
+	}
+
+	return sc, nil
+}
