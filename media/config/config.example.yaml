@@ -1,0 +1,18 @@
+ServiceConfig:
+  Server:
+    Name: Auth
+    RestAddr: 0.0.0.0:6667
+    CertFile: ./cert/server.crt
+    KeyFile: ./cert/server.key
+    ServerName: grpcserver
+    Nodes:
+      - Name: Auth
+        Host: auth
+        Port: 9999
+      - Name: Posts
+        Host: posts
+        Port: 7777
+      - Name: Users
+        Host: users
+        Port: 8888
+LocalStore: /media-store

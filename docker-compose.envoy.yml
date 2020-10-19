@@ -63,10 +63,26 @@ services:
       - ./users/bin:/zwitter-bin
       - ./users/swagger:/swagger
     expose:
-      # gRPC server runs on this port
+      # Http server runs on this port
       - "8000"
       # gRPC server runs on this port
       - "8888"
+
+  media:
+    image: zwiter/media:1.0
+    networks:
+      - envoymesh
+    environment:
+      GODEBUG: x509ignoreCN=0
+      SERVICE_NAME: media
+    volumes:
+      - ./media/config:/config
+      - ./media/bin:/zwitter-bin
+      - ./media/swagger:/swagger
+      - ./media/media-store:/media-store
+    expose:
+      # http REST server runs on this port
+      - "8000"
 
 networks:
   envoymesh: {}
