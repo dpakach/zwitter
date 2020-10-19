@@ -36,28 +36,34 @@ swagger: api
 		--swagger_out=logtostderr=true:./swagger \
 		api/auth_api.proto
 
-docs: swagger
+docs: swagger ## Generate swagger documentation files
 
 api: api/authpb/api.pb.go api/authpb/api.pb.gw.go ## Auto-generate grpc go sources
 
-dep: ## Get the dependencies
+dep: ## Download go dependencies
 	@go get -v -d ./...
 
-server: dep api ## Build the binary file for server
-	@go build -tags netgo -a -i -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
+server: dep ## Build the server binary
+	@go build -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
 
-client: dep api ## Build the binary file for client
-	@go build -tags netgo -a -i -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
+client: dep ## Build the client binary
+	@go build -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
 
-clean: ## Remove previous builds
+clean: ## Clean all build products
 	@rm -rf $(SERVER_OUT) $(CLIENT_OUT)
 
-docker-build:
+docker-build: ## Build the docker image of the service
 	docker build -t zwiter/auth:$(VERSION) --build-arg service_name=auth -f ../service/Dockerfile  .. --no-cache
 
-docker-run: docker-build
+docker-run: docker-build ## Build and run the service in a docker container
 	docker run --rm -it --name=z-auth --network=host zwitter-auth
 
-help: ## Display this help screen
+help: ## List available make commands
+	@echo
+	@echo Zwitter:Auth $(VERSION)
+	@echo ------------------------------------------
+	@echo
+	@echo Available commands
+	@echo
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 

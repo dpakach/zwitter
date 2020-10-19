@@ -1,6 +1,6 @@
 ServiceConfig:
   Server:
-    Name: Auth
+    Name: Media
     RestAddr: 0.0.0.0:6667
     CertFile: ./cert/server.crt
     KeyFile: ./cert/server.key

@@ -36,28 +36,34 @@ swagger: api
 		--swagger_out=logtostderr=true:./swagger \
 		api/users_api.proto
 
-docs: swagger
+docs: swagger ## Generate swagger documentation files
 
 api: api/userspb/api.pb.go api/userspb/api.pb.gw.go ## Auto-generate grpc go sources
 
-dep: ## Get the dependencies
+dep: ## download the go dependencies
 	@go get -v -d ./...
 
-server: dep api ## Build the binary file for server
-	@go build -tags netgo -a -i -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
+server: dep ## Build the server binary
+	@go build -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
 
-client: dep api ## Build the binary file for client
-	@go build -tags netgo -a -i -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
+client: dep ## Build the client binary
+	@go build -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
 
-clean: ## Remove previous builds
+clean: ## Clean all the build products
 	@rm -rf $(SERVER_OUT) $(CLIENT_OUT)
 
-docker-build:
+docker-build: ## build the docker images for the service
 	docker build -t zwiter/users:$(VERSION) --build-arg service_name=users -f ../service/Dockerfile  .. --no-cache
 
-docker-run: docker-build
+docker-run: docker-build ## Build and run the service in a docker container
 	docker run --rm -it --name=z-users --network=host zwitter-users
 
 help: ## Display this help screen
+	@echo
+	@echo Zwitter:Users $(VERSION)
+	@echo ------------------------------------------
+	@echo
+	@echo Available make commands
+	@echo
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
