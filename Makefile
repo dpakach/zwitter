@@ -75,7 +75,7 @@ stop: ## Stop the services
 
 dev: envoy-run frontend-watch ## Start the development environment
 
-run: frontend-build envoy-run
+run: envoy-run
 
 fmt: ## Format the go code with gofmt
 	go fmt ./...

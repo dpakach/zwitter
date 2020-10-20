@@ -3,19 +3,21 @@ package api
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"golang.org/x/net/context"
 
 	"github.com/dpakach/zwitter/pkg/auth"
 	"github.com/dpakach/zwitter/pkg/data"
+	zlog "github.com/dpakach/zwitter/pkg/log"
 	"github.com/dpakach/zwitter/pkg/service"
 	"github.com/dpakach/zwitter/posts/api/postspb"
 	"github.com/dpakach/zwitter/users/api/userspb"
 )
 
-type Server struct{}
+type Server struct {
+	Log *zlog.ZwitLogger
+}
 
 var ConfigParseError = fmt.Errorf("Error while parsing the config")
 
@@ -59,7 +61,7 @@ func postPb(ctx context.Context, post *data.Post, user *userspb.User) *postspb.P
 }
 
 func (s *Server) SayHello(ctx context.Context, in *postspb.PingMessage) (*postspb.PingMessage, error) {
-	log.Printf("Received message %s", in.Greeting)
+	s.Log.Infof("Received message %s", in.Greeting)
 	return &postspb.PingMessage{Greeting: "Hello from posts service"}, nil
 }
 
@@ -68,22 +70,26 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 
 	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
 	if !ok {
+		s.Log.Errorf("Failed to create a new post: User not authenticated properly")
 		return nil, errors.New("Invalid userid")
 	}
 
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
+		s.Log.Errorf("Failed to create a new post: Service not configured properly")
 		return nil, fmt.Errorf("Not configured properly")
 	}
 
 	resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: user.Id})
 	if err != nil {
+		s.Log.Errorf("Failed to connect to the users service: %v", err)
 		return nil, err
 	}
 
 	parentid := in.GetParentid()
 	if parentid != 0 {
 		if parent := data.PostStore.GetByID(parentid); parent == nil {
+			s.Log.Errorf("Could not find the parent post: Bad request")
 			return nil, fmt.Errorf("Could not find the parent")
 		}
 	}
@@ -92,6 +98,7 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 	post.Author = resp.User.Id
 
 	data.PostStore.AddDbList(post)
+	s.Log.Info("Created a new post")
 
 	return &postspb.CreatePostResponse{
 		Post: postPb(ctx, post, resp.User),
@@ -101,6 +108,7 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.GetPostsResponse, error) {
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
+		s.Log.Errorf("Failed to create a new post: Service not configured properly")
 		return nil, fmt.Errorf("Not configured properly")
 	}
 
@@ -111,6 +119,7 @@ func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.
 	for _, post := range posts {
 		resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
 		if err != nil {
+			s.Log.Errorf("Failed to fetch users from users service")
 			return nil, errors.New("Failed while retriving users")
 		}
 		result = append(result, postPb(ctx, &post, resp.User))
@@ -125,16 +134,19 @@ func (s *Server) GetPost(ctx context.Context, in *postspb.GetPostRequest) (*post
 	post := data.PostStore.GetPostWithChilds(in.Id)
 
 	if post == nil {
+		s.Log.Errorf("Could not find the requested post")
 		return nil, errors.New("Could not find the post")
 	}
 
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
+		s.Log.Errorf("Failed to create a new post: Service not configured properly")
 		return nil, fmt.Errorf("Not configured properly")
 	}
 
 	resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
 	if err != nil {
+		s.Log.Errorf("Failed to fetch users from users service")
 		return nil, errors.New("Failed while retriving user")
 	}
 	return &postspb.GetPostResponse{
@@ -146,6 +158,7 @@ func (s *Server) GetPostChilds(ctx context.Context, in *postspb.GetPostRequest) 
 	post := data.PostStore.GetByID(in.Id)
 
 	if post == nil {
+		s.Log.Errorf("Could not find the requested post")
 		return nil, errors.New("Could not find the post")
 	}
 
@@ -153,6 +166,7 @@ func (s *Server) GetPostChilds(ctx context.Context, in *postspb.GetPostRequest) 
 
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
+		s.Log.Errorf("Failed to create a new post: Service not configured properly")
 		return nil, fmt.Errorf("Not configured properly")
 	}
 
@@ -160,6 +174,7 @@ func (s *Server) GetPostChilds(ctx context.Context, in *postspb.GetPostRequest) 
 	for _, post := range childPosts {
 		resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
 		if err != nil {
+			s.Log.Errorf("Failed to fetch users from users service")
 			return nil, errors.New("Failed while retriving user")
 		}
 		result = append(result, postPb(ctx, &post, resp.User))
@@ -173,12 +188,14 @@ func (s *Server) GetPostChilds(ctx context.Context, in *postspb.GetPostRequest) 
 func (s *Server) LikePost(ctx context.Context, in *postspb.LikeRequest) (*postspb.EmptyData, error) {
 	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
 	if !ok {
+		s.Log.Errorf("Failed to get user: Invalid userId")
 		return nil, errors.New("Invalid userid")
 	}
 
 	post := data.PostStore.GetByID(in.Post)
 
 	if post == nil {
+		s.Log.Errorf("Could not find the requested post")
 		return nil, errors.New("Could not find the post")
 	}
 
@@ -186,6 +203,7 @@ func (s *Server) LikePost(ctx context.Context, in *postspb.LikeRequest) (*postsp
 	if like != nil {
 		err := data.LikeStore.DeleteLike(in.Post, user.Id)
 		if err != nil {
+			s.Log.Errorf("Failed to unlike the post: %v", err)
 			return nil, err
 		}
 		return &postspb.EmptyData{}, nil

@@ -13,17 +13,21 @@ import (
 	"github.com/dpakach/zwitter/media/storage"
 	"github.com/dpakach/zwitter/pkg/auth"
 	"github.com/dpakach/zwitter/pkg/config"
+	zlog "github.com/dpakach/zwitter/pkg/log"
 	"github.com/gorilla/mux"
 )
 
 func main() {
+	logger := zlog.New()
 	cfg, err := config.NewMediaSericeConfig("config/config.yaml")
 	if err != nil {
+		logger.Errorf("Failed to read config: %s", err)
 		panic(fmt.Errorf("Failed to read config: %s", err))
 	}
 
 	err, authEndpoint := cfg.ServiceConfig.GetNodeAddr("Auth")
 	if err != nil {
+		logger.Errorf("Failed to read auth service address, Not configured properly: %v", err)
 		log.Fatal(err)
 	}
 	conn, AuthClient := auth.NewAuthClient(authEndpoint)
@@ -32,11 +36,14 @@ func main() {
 	_, err = os.Stat(cfg.LocalStore)
 	if err != nil {
 		if os.IsNotExist(err) {
+			logger.Warnf("Store folder %v doesn't exists, creating...", cfg.LocalStore)
 			mkdirErr := os.MkdirAll(cfg.LocalStore, os.ModePerm)
 			if mkdirErr != nil {
+				logger.Errorf("Error creating the store directory: %v", mkdirErr)
 				log.Fatalf(mkdirErr.Error())
 			}
 		} else {
+			logger.Errorf("Error while trying to read the store directory: %v", err)
 			log.Fatal(err)
 		}
 	}
@@ -45,9 +52,10 @@ func main() {
 		&storage.Local{BasePath: cfg.LocalStore},
 		cfg,
 		AuthClient,
+		logger,
 	)
 
-	helloHandler := api.NewHello()
+	helloHandler := api.NewHello(logger)
 
 	sm := mux.NewRouter()
 
@@ -72,11 +80,11 @@ func main() {
 
 	// start the server
 	go func() {
-		fmt.Println("Starting server on " + cfg.Server.RestAddr)
+		logger.Info("Starting server on " + cfg.Server.RestAddr)
 
 		err := s.ListenAndServe()
 		if err != nil {
-			fmt.Printf("Error starting server: %s\n", err)
+			logger.Errorf("Error starting server: %s\n", err)
 			os.Exit(1)
 		}
 	}()
@@ -88,7 +96,7 @@ func main() {
 
 	// Block until a signal is received.
 	sig := <-c
-	fmt.Println("Got signal:", sig)
+	logger.Infof("Got signal: %v", sig)
 
 	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)

@@ -10,26 +10,31 @@ import (
 	"github.com/dpakach/zwitter/media/storage"
 	"github.com/dpakach/zwitter/pkg/config"
 	"github.com/dpakach/zwitter/pkg/data"
+	zlog "github.com/dpakach/zwitter/pkg/log"
 	"github.com/gorilla/mux"
 )
 
 type KeyUserData struct{}
 
-type Hello struct{}
+type Hello struct {
+	Log *zlog.ZwitLogger
+}
 
 func (h *Hello) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(200)
+	h.Log.Info("Received hello request")
 	rw.Write([]byte("Hello from the media service"))
 }
 
-func NewHello() *Hello {
-	return &Hello{}
+func NewHello(log *zlog.ZwitLogger) *Hello {
+	return &Hello{log}
 }
 
 type Media struct {
 	store             storage.Storage
 	config            *config.MediaServiceConfig
 	authServiceClient authpb.AuthServiceClient
+	Log               *zlog.ZwitLogger
 }
 
 type saveFileOutput struct {
@@ -43,18 +48,21 @@ func (m *Media) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	uuid := data.NewUuid()
 
+	m.Log.Infof("Saving a new file: %v", filename)
 	err := m.store.Save(fmt.Sprintf("%v/%v", string(uuid), filename), r.Body)
 	if err != nil {
+		m.Log.Errorf("Failed to save the file to the store: %v", err)
 		http.Error(rw, "Failed to save the file.", http.StatusBadRequest)
 		return
 	}
+	m.Log.Infof("Saved the new file to %v", filename)
 	rw.Header().Set("Content-Type", "application/json")
 	resp := &saveFileOutput{fmt.Sprintf("%v/%v", string(uuid), filename), ""}
 	json.NewEncoder(rw).Encode(resp)
 }
 
-func NewMedia(s storage.Storage, cfg *config.MediaServiceConfig, authClient authpb.AuthServiceClient) *Media {
-	return &Media{s, cfg, authClient}
+func NewMedia(s storage.Storage, cfg *config.MediaServiceConfig, authClient authpb.AuthServiceClient, log *zlog.ZwitLogger) *Media {
+	return &Media{s, cfg, authClient, log}
 }
 
 func setupResponse(rw *http.ResponseWriter, req *http.Request) {
@@ -79,9 +87,17 @@ func SetCorsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func (m *Media) FilesServerLoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		m.Log.Info("Files server, getting new file")
+		next.ServeHTTP(rw, r)
+	})
+}
+
 func (m *Media) VerifyTokenMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
+			m.Log.Errorf("Received an invalid method %v, Only POST is allowed in this endpoint", r.Method)
 			rw.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
@@ -90,7 +106,14 @@ func (m *Media) VerifyTokenMiddleware(next http.Handler) http.Handler {
 
 		resp, err := m.authServiceClient.AuthenticateToken(context.Background(), &authpb.AuthenticateTokenRequest{Token: token})
 
-		if err != nil || !(resp.Auth) {
+		if err != nil {
+			m.Log.Errorf("Failed to authenticate the user: Could not connect to auth service")
+			http.Error(rw, "Failed to authenticate client", http.StatusInternalServerError)
+			return
+		}
+
+		if !(resp.Auth) {
+			m.Log.Errorf("Failed to authenticate the user: invalid token")
 			http.Error(rw, "Failed to authenticate client", http.StatusUnauthorized)
 			return
 		}
