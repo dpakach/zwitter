@@ -42,7 +42,7 @@ export default function App() {
             message && <p> {message} </p>
           }
           {
-            loggedIn && <p>Logged in as <b>@{"<username>"}</b></p>
+            loggedIn && <p>Logged in as <b>@{tokens.user.username}</b></p>
           }
           <div>
             <Link to="/">Home </Link>

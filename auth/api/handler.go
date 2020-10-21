@@ -55,7 +55,9 @@ func (s *Server) GetToken(ctx context.Context, in *authpb.GetTokenRequest) (*aut
 		return nil, fmt.Errorf("Error while creating refresh token: %v", err)
 	}
 
-	return &authpb.GetTokenResponse{Token: token, RefreshToken: refreshToken}, nil
+	return &authpb.GetTokenResponse{Token: token, RefreshToken: refreshToken, User: &authpb.User{
+		Username: user.Username, Id: user.ID, Created: user.Created,
+	}}, nil
 }
 
 func (s *Server) AuthenticateToken(ctx context.Context, in *authpb.AuthenticateTokenRequest) (*authpb.AuthenticateTokenResponse, error) {

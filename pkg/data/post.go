@@ -1,7 +1,5 @@
 package data
 
-import "fmt"
-
 var PostStore = new(Posts)
 
 // Posts type for Users List
@@ -63,8 +61,6 @@ func (p *Posts) GetPostWithChilds(id int64) *Post {
 	post := p.GetByID(id)
 	if post != nil {
 		childs := p.GetPostChilds(id)
-		fmt.Println(childs)
-		fmt.Println(post)
 		post.Children = childs
 	}
 	return post
@@ -83,13 +79,14 @@ func (p *Posts) NewID() int64 {
 
 // Post type for a Post Instance
 type Post struct {
-	ID       int64  `json:"id"`
-	Title    string `json:"title"`
-	Created  int64  `json:"created"`
-	Author   int64  `json:"author"`
-	ParentId int64  `json:"parentid"`
-	Children []Post `json:"children"`
-	Media    string `json:"media"`
+	ID        int64  `json:"id"`
+	Title     string `json:"title"`
+	Created   int64  `json:"created"`
+	Author    int64  `json:"author"`
+	ParentId  int64  `json:"parentid"`
+	Children  []Post `json:"children"`
+	Media     string `json:"media"`
+	RezweetId int64  `json:"rezweetId"`
 }
 
 // GetID returns ID of the Post

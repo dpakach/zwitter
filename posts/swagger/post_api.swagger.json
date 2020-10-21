@@ -171,6 +171,38 @@
         ]
       }
     },
+    "/posts/id/rezweet": {
+      "post": {
+        "operationId": "PostsService_Rezweet",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbCreatePostResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbRezweetRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
     "/posts/ping": {
       "post": {
         "operationId": "PostsService_SayHello",
@@ -214,6 +246,9 @@
         "parentid": {
           "type": "string",
           "format": "int64"
+        },
+        "media": {
+          "type": "string"
         }
       }
     },
@@ -307,6 +342,24 @@
         "liked": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "media": {
+          "type": "string"
+        },
+        "rezweet": {
+          "$ref": "#/definitions/postspbPost"
+        }
+      }
+    },
+    "postspbRezweetRequest": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "rezweetId": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
