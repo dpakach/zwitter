@@ -68,3 +68,24 @@ func NewMediaSericeConfig(configFile string) (*MediaServiceConfig, error) {
 
 	return sc, nil
 }
+
+type WebServiceConfig struct {
+	ServiceConfig `yaml:"ServiceConfig"`
+	AssetsPath    string `yaml:"AssetsPath"`
+}
+
+func NewWebSericeConfig(configFile string) (*WebServiceConfig, error) {
+	f, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		return nil, err
+	}
+
+	sc := &WebServiceConfig{}
+
+	err = yaml.Unmarshal(f, &sc)
+	if err != nil {
+		return nil, err
+	}
+
+	return sc, nil
+}

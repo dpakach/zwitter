@@ -22,7 +22,6 @@ services:
     networks:
       - envoymesh
     environment:
-      GODEBUG: x509ignoreCN=0
       SERVICE_NAME: auth
     volumes:
       - ./auth/config:/config
@@ -39,7 +38,6 @@ services:
     networks:
       - envoymesh
     environment:
-      GODEBUG: x509ignoreCN=0
       SERVICE_NAME: posts
     volumes:
       - ./posts/config:/config
@@ -56,7 +54,6 @@ services:
     networks:
       - envoymesh
     environment:
-      GODEBUG: x509ignoreCN=0
       SERVICE_NAME: users
     volumes:
       - ./users/config:/config
@@ -73,13 +70,26 @@ services:
     networks:
       - envoymesh
     environment:
-      GODEBUG: x509ignoreCN=0
       SERVICE_NAME: media
     volumes:
       - ./media/config:/config
       - ./media/bin:/zwitter-bin
       - ./media/swagger:/swagger
       - ./media/media-store:/media-store
+    expose:
+      # http REST server runs on this port
+      - "8000"
+
+  web:
+    image: zwiter/web:1.0
+    networks:
+      - envoymesh
+    environment:
+      SERVICE_NAME: web
+    volumes:
+      - ./web/config:/config
+      - ./web/bin:/zwitter-bin
+      - ./frontend/dist:/dist
     expose:
       # http REST server runs on this port
       - "8000"

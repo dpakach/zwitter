@@ -1,10 +1,10 @@
 ServiceConfig:
   Server:
-    Name: Media
-    RestAddr: 0.0.0.0:6667
-    CertFile: ./cert/server.crt
-    KeyFile: ./cert/server.key
-    ServerName: grpcserver
+    Name: Web
+    RestAddr: 0.0.0.0:5556
+    CertFile: cert/server.crt
+    KeyFile: cert/server.key
+    ServerName: zwitter
     Nodes:
       - Name: Auth
         Host: auth
@@ -15,4 +15,5 @@ ServiceConfig:
       - Name: Users
         Host: users
         Port: 8888
-LocalStore: /media-store
+AssetsPath: /dist
+
