@@ -13,7 +13,7 @@ service: ## build the binary and docker image of $SERVICE service
 restart-service: ## Restart a service $SERVICE
 	docker-compose -f ./docker-compose.envoy.yml restart $(SERVICE)
 
-build: ## Build the binaries and docker-images for all the services
+build: frontend-build ## Build the binaries and docker-images for all the services
 	cd auth && \
 	make && make docker-build && \
 	cd ../posts && \
@@ -21,6 +21,8 @@ build: ## Build the binaries and docker-images for all the services
 	cd ../users && \
 	make && make docker-build && \
 	cd ../media && \
+	make && make docker-build && \
+	cd ../web && \
 	make && make docker-build
 
 clean: ## Clean the build products for all the services
@@ -31,6 +33,8 @@ clean: ## Clean the build products for all the services
 	cd ../users && \
 	make clean && \
 	cd ../media && \
+	make clean && \
+	cd ../web && \
 	make clean
 
 config: ## Create default configuraion files
@@ -41,6 +45,8 @@ config: ## Create default configuraion files
 	cd ../users && \
 	cp config/config.example.yaml config/config.yaml && \
 	cd ../media && \
+	cp config/config.example.yaml config/config.yaml && \
+	cd ../web && \
 	cp config/config.example.yaml config/config.yaml
 
 docker-run: ## Run zwitter with vanilla docker-compose setup
@@ -53,6 +59,10 @@ js-deps: ## Install javascript dependencies
 	cd frontend && \
 	yarn
 
+frontend-build: js-deps frontend/dist ## Start frontend dev environment
+	cd frontend && \
+	yarn build
+
 frontend-watch: js-deps ## Start frontend dev environment
 	cd frontend && \
 	yarn start
@@ -64,6 +74,8 @@ stop: ## Stop the services
 	docker-compose -f ./docker-compose.envoy.yml down
 
 dev: envoy-run frontend-watch ## Start the development environment
+
+run: frontend-build envoy-run
 
 fmt: ## Format the go code with gofmt
 	go fmt ./...

@@ -41,6 +41,10 @@ static_resources:
                   prefix: "/media"
                 route:
                   cluster: media_service
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: web_service
           http_filters:
           - name: envoy.filters.http.cors
             typed_config: {}
@@ -105,6 +109,21 @@ static_resources:
               address:
                 socket_address:
                   address: media
+                  port_value: 8000
+
+    - name: web_service
+      connect_timeout: 0.25s
+      type: strict_dns
+      http2_protocol_options: {}
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: web_service
+        endpoints:
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: web
                   port_value: 8000
 
 admin:

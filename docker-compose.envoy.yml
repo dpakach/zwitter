@@ -80,5 +80,19 @@ services:
       # http REST server runs on this port
       - "8000"
 
+  web:
+    image: zwiter/web:1.0
+    networks:
+      - envoymesh
+    environment:
+      SERVICE_NAME: web
+    volumes:
+      - ./web/config:/config
+      - ./web/bin:/zwitter-bin
+      - ./frontend/dist:/dist
+    expose:
+      # http REST server runs on this port
+      - "8000"
+
 networks:
   envoymesh: {}

@@ -4,7 +4,7 @@ zwitter is a micro blogging platform built with microservice architecture powere
 
 ### Running locally
 To run zwitter locally you will need to have go installed in your system first. Go to the [official documentation](https://golang.org/doc/install) for installing golang in your system and download.
-Also [install yarn](https://classic.yarnpkg.com/en/docs/install#debian-stable) in your system for js package management.
+Also [install nodejs]() and [install yarn](https://classic.yarnpkg.com/en/docs/install#debian-stable) in your system for js package management.
 
 After that clone and build this project locally.
 ```bash
@@ -25,13 +25,34 @@ With this you can run the project using docker-compose
 For that just run the following command
 
 ``` bash
-make dev
+make run
 ```
 
-Open your browser and visit http://localhost:8081.
+Open your browser and visit http://localhost:8080.
 
 You should be see the home page of zwitter.
 
+### Setting up dev environment
+To setup dev environment, just run following command
+```
+make dev
+```
+
+This will run webpack-dev-server so hot reloading is enabled in all the frontend files.
+
+To reload after the changes made on go files, first build the service after making the changes and then restart the service.
+
+for eg. If you do some changes in the posts service, first build the service with following commands
+```
+cd posts
+make
+```
+Now restart he service with following command
+```
+make restart-service SERVICE=posts
+```
+
+### Commands
 Run `make help` to get the list of other available make commands
 ```
 ➜ make help
