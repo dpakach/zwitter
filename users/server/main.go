@@ -7,6 +7,7 @@ import (
 
 	"github.com/dpakach/zwitter/pkg/auth"
 	"github.com/dpakach/zwitter/pkg/config"
+	zlog "github.com/dpakach/zwitter/pkg/log"
 	"github.com/dpakach/zwitter/pkg/service"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
@@ -30,11 +31,13 @@ func main() {
 	conn, AuthClient := auth.NewAuthClient(AuthEndpoint)
 	defer conn.Close()
 
+	logger := zlog.New()
+
 	service := &service.Service{
 		Config:   cfg,
 		AuthRPCs: []string{},
-		RegisterGrpcServer: func(serv *grpc.Server) {
-			userspb.RegisterUsersServiceServer(serv, &api.Server{})
+		RegisterGrpcServer: func(serv *grpc.Server, log *zlog.ZwitLogger) {
+			userspb.RegisterUsersServiceServer(serv, &api.Server{Log: log})
 		},
 		RegisterRestServer: func(ctx context.Context, mux *runtime.ServeMux, grpcAddr string, opts []grpc.DialOption) error {
 			return userspb.RegisterUsersServiceHandlerFromEndpoint(ctx, mux, grpcAddr, opts)
@@ -42,6 +45,7 @@ func main() {
 		AuthServiceClient: AuthClient,
 		RPCBasePath:       "/userspb.UsersService/",
 		SwaggerFile:       "./swagger/user_api.swagger.json",
+		Log:               logger,
 	}
 
 	service.Start()

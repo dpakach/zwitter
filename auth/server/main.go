@@ -8,6 +8,7 @@ import (
 	"github.com/dpakach/zwitter/auth/api/authpb"
 	"github.com/dpakach/zwitter/pkg/auth"
 	"github.com/dpakach/zwitter/pkg/config"
+	zlog "github.com/dpakach/zwitter/pkg/log"
 	"github.com/dpakach/zwitter/pkg/service"
 	"google.golang.org/grpc"
 )
@@ -26,16 +27,19 @@ func main() {
 	conn, UsersClient := auth.NewUsersClient(UsersEndpoint)
 	defer conn.Close()
 
+	Logger := zlog.New()
+
 	service := &service.Service{
 		Config:   cfg,
 		AuthRPCs: []string{},
-		RegisterGrpcServer: func(serv *grpc.Server) {
-			authpb.RegisterAuthServiceServer(serv, &api.Server{})
+		RegisterGrpcServer: func(serv *grpc.Server, logger *zlog.ZwitLogger) {
+			authpb.RegisterAuthServiceServer(serv, &api.Server{Log: logger})
 		},
 		RegisterRestServer: authpb.RegisterAuthServiceHandlerFromEndpoint,
 		UsersServiceClient: UsersClient,
 		RPCBasePath:        "/authpb.AuthService/",
 		SwaggerFile:        "./swagger/auth_api.swagger.json",
+		Log:                Logger,
 	}
 
 	service.Start()

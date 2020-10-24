@@ -6,22 +6,26 @@ import (
 	"path/filepath"
 
 	"github.com/dpakach/zwitter/pkg/config"
+	zlog "github.com/dpakach/zwitter/pkg/log"
 )
 
-type Hello struct{}
+type Hello struct {
+	Log *zlog.ZwitLogger
+}
 
 func (h *Hello) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(200)
 	rw.Write([]byte("Hello from the Web service"))
 }
 
-func NewHello() *Hello {
-	return &Hello{}
+func NewHello(log *zlog.ZwitLogger) *Hello {
+	return &Hello{log}
 }
 
 type Web struct {
 	config    *config.WebServiceConfig
 	indexPath string
+	Log       *zlog.ZwitLogger
 }
 
 type saveFileOutput struct {
@@ -50,6 +54,6 @@ func (w *Web) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	http.FileServer(http.Dir(w.config.AssetsPath)).ServeHTTP(rw, r)
 }
 
-func NewWeb(config *config.WebServiceConfig, indexPath string) *Web {
-	return &Web{config, indexPath}
+func NewWeb(config *config.WebServiceConfig, indexPath string, log *zlog.ZwitLogger) *Web {
+	return &Web{config, indexPath, log}
 }
