@@ -59,7 +59,7 @@ js-deps: ## Install javascript dependencies
 	cd frontend && \
 	yarn
 
-frontend-build: js-deps frontend/dist ## Start frontend dev environment
+frontend-build: js-deps ## Start frontend dev environment
 	cd frontend && \
 	yarn build
 
@@ -75,7 +75,7 @@ stop: ## Stop the services
 
 dev: envoy-run frontend-watch ## Start the development environment
 
-run: frontend-build envoy-run
+run: envoy-run
 
 fmt: ## Format the go code with gofmt
 	go fmt ./...
