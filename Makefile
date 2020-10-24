@@ -59,7 +59,7 @@ js-deps: ## Install javascript dependencies
 	cd frontend && \
 	yarn
 
-frontend-build: js-deps frontend/dist ## Start frontend dev environment
+frontend-build: js-deps ## Start frontend dev environment
 	cd frontend && \
 	yarn build
 
