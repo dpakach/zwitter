@@ -14,7 +14,6 @@ function SinglePost(props) {
       .then(res => res.json())
       .then(json => {
         setPost(json.post)
-        setMessage("success")
       }, (error) => {
         setMessage(error)
       })

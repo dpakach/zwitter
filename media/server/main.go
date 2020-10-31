@@ -63,12 +63,12 @@ func main() {
 	helloSubrouter.Handle("/media/ping", helloHandler)
 
 	postHandler := sm.Methods(http.MethodPost).Subrouter()
-	postHandler.Handle("/media/{filename:[a-zA-Z]+\\.[a-z]{3}}", mediaHandler)
+	postHandler.Handle("/media/{filename:[\\w~%\\- ]+\\.[a-z]{3,4}}", mediaHandler)
 	postHandler.Use(mediaHandler.VerifyTokenMiddleware)
 
 	getHandler := sm.Methods(http.MethodGet).Subrouter()
 	getHandler.Handle(
-		"/media/{uuid:[0-9a-f\\-]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}",
+		"/media/{uuid:[0-9a-f\\-]+}/{filename:[\\w~%\\- ]+\\.[a-z]{3,4}}",
 		http.StripPrefix("/media", http.FileServer(http.Dir(cfg.LocalStore))),
 	)
 

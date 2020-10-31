@@ -1,13 +1,20 @@
 import React, {useState, useEffect} from "react"
 import {sendRequest} from "./helpers/request"
-import {Link} from "react-router-dom"
+import {Link, useHistory} from "react-router-dom"
 import {baseUrl} from "./const"
 
 function Post({post: p, tokens, level, loggedIn, clickable}) {
+  const reactTypes = Object.freeze({
+    REPLY: 'reply',
+    REZWEET: 'rezweet',
+    LIKE: 'LIKE',
+  })
   const [replyShown, setReplyShown] = useState(false)
+  const [rezweetShown, setRezweetShown] = useState(false)
   const [replyText, setReplyText] = useState("")
   const [post, setPost] = useState(p)
   const [message, setMessage] = useState("")
+  const history = useHistory()
 
   const [updateKey, updatePage] = useState(0)
 
@@ -19,13 +26,55 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
   const created = new Date(post.created * 1000)
   const formattedDate = created.toLocaleTimeString("en-US", dateOptions)
 
+  function getRezweet(rezweet) {
+    if (Object.keys(rezweet).length === 0) {
+      return
+    }
+    const created = new Date(rezweet.created * 1000)
+    const formattedDate = created.toLocaleTimeString("en-US", dateOptions)
+    return (
+       <div style={{
+         margin: "10px",
+         border: "2px solid #333",
+         padding: "10px",
+         maxWidth: "400px",
+       }}>
+          <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${rezweet.id}`}>
+            <p>{rezweet.text}</p>
+          </Link>
+          {rezweet.media && (
+            <img src={`${baseUrl}/media/${rezweet.media}`} alt={post.text} style={{width: '400px'}} />
+          )}
+          <b>@{rezweet.author.username}</b>
+          <br/>
+          {formattedDate}
+          <br/>
+        </div>
+    )
+  }
+
   function handleSubmit(e) {
     e.preventDefault()
-    return sendRequest("/posts/create", {text: replyText, parentid: post.id}, {"token": tokens.token})
+    let body = {text: replyText}
+    let url = "/posts/create"
+
+    if (rezweetShown) {
+      body = {...body, rezweetId: post.id}
+      url = "/posts/id/rezweet"
+    } else {
+      body = {...body, parentid: post.id}
+    }
+
+    return sendRequest(url, body, {"token": tokens.token})
       .then(res => res.json())
       .then((json) => {
         setReplyText("")
-        setPost({...post, children: [json.post, ...(post.children || [])]})
+
+        if (url === "/posts/create") {
+          setPost({...post, children: [json.post, ...(post.children || [])]})
+        } else {
+          history.push("/post/" + json.post.id)
+        }
         setReplyShown(false)
       }, (error) => {
         setMessage("Error: " + error.message)
@@ -47,12 +96,32 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
       })
   }
 
+  function toggleReplyRezweet(type) {
+    if (type == reactTypes.REZWEET) {
+      setReplyShown(false)
+      setRezweetShown(!rezweetShown)
+    } else if (type == reactTypes.REPLY) {
+      setRezweetShown(false)
+      setReplyShown(!replyShown)
+    } else {
+      return
+    }
+  }
+
   return(
    <div style={{
      marginLeft: `${level === 0 ? 0 : 20}px`,
      borderLeft: level === 0 ? "" : "2px solid #333",
-     paddingLeft: "10px"
+     paddingLeft: "10px",
+     marginBottom: "5rem",
    }}>
+      {Object.keys(post.rezweet).length === 0 ?
+        <></> :
+        <>
+          <small>@{post.author.username} rezweeted</small>
+          <br/>
+        </>
+      }
       {clickable ? 
         (
           <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${post.id}`}>
@@ -63,6 +132,10 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
         )
       }
       <br/>
+      {(post.rezweet === {}) ?
+        <></> :
+        getRezweet(post.rezweet)
+      }
       <b>@{post.author.username}</b>
       <br/>
       {formattedDate}
@@ -73,7 +146,8 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
       <br/>
       {!loggedIn || (
         <>
-          <button onClick={() => setReplyShown(!replyShown)}>reply</button>
+          <button onClick={() => toggleReplyRezweet(reactTypes.REPLY)}>reply</button>
+          <button onClick={() => toggleReplyRezweet(reactTypes.REZWEET)}>rezweet</button>
           <button
             onClick={likePost}
             style={post.liked ? {
@@ -84,11 +158,13 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
         </>
       )}
       <p>Likes: {post.likes || 0}</p>
-      {!replyShown || (
+      {!(replyShown || rezweetShown) || (
         <>
           <p>{message}</p>
           <form onSubmit={handleSubmit}>
-            <textarea placeholder="Reply to the post" type="text" value={replyText} onChange={(e) => { setReplyText(e.target.value)}} name="text" />
+            <textarea placeholder={
+              replyShown ? "Reply to the post" : "Retweet this post"
+            } type="text" value={replyText} onChange={(e) => { setReplyText(e.target.value)}} name="text" />
             <input type="submit" value="Submit" />
           </form>
         </>

@@ -21,6 +21,7 @@ message Post {
   int64 likes=7;
   bool liked=8;
   string media=9;
+  Post rezweet=10;
 }
 
 message User {
@@ -32,6 +33,11 @@ message CreatePostRequest {
 	string text=1;
   int64 parentid=2;
   string media=3;
+}
+
+message RezweetRequest {
+	string text=1;
+  int64 rezweetId=4;
 }
 
 message CreatePostResponse {
@@ -88,6 +94,12 @@ service PostsService {
   rpc LikePost(LikeRequest) returns (EmptyData) {
      option (google.api.http) = {
        post: "/posts/id/like"
+       body: "*"
+     };
+  };
+  rpc Rezweet(RezweetRequest) returns (CreatePostResponse) {
+     option (google.api.http) = {
+       post: "/posts/id/rezweet"
        body: "*"
      };
   };
