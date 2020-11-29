@@ -6,7 +6,7 @@ export function sendRequest(endpoint, body={}, headers={}, method="POST") {
   }
   return fetch(`${baseUrl}${endpoint}`, {
     method,
-    body,
+    body: (method === "GET") ? undefined : body,
     headers
   })
   .then(res => {
@@ -17,6 +17,14 @@ export function sendRequest(endpoint, body={}, headers={}, method="POST") {
     }
     return res
   })
+}
+
+export function get(endpoint, {headers={}}) {
+  return sendRequest(endpoint, null, headers, "GET")
+}
+
+export function post(endpoint, {body={}, headers={}}) {
+  return sendRequest(endpoint, body, headers, "POST")
 }
 
 export function sendFileUploadRequest(endpoint, file, headers={}) {

@@ -19,7 +19,7 @@ message User {
 
 message CreateUserRequest {
 	string username=1;
-	string password=4;
+	string password=2;
 }
 
 message CreateUserResponse {
@@ -61,20 +61,18 @@ service UsersService {
   }
 	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
      option (google.api.http) = {
-       post: "/users/create"
+       post: "/users"
        body: "*"
      };
   };
 	rpc GetUsers(EmptyData) returns (GetUsersResponse) {
      option (google.api.http) = {
-       post: "/users/get"
-       body: "*"
+       get: "/users"
      };
   };
 	rpc GetUser(GetUserRequest) returns (GetUserResponse) {
      option (google.api.http) = {
-       post: "/users/username"
-       body: "*"
+       get: "/users/{username=*}"
      };
   };
 	rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
@@ -85,7 +83,7 @@ service UsersService {
   };
   rpc GetUserByID(GetUserByIDRequest) returns (GetUserResponse) {
      option (google.api.http) = {
-       post: "/users/id"
+       post: "/users/{id=*}"
        body: "*"
      };
   }

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react"
-import {sendRequest} from "./helpers/request"
+import {post as httpPost, get} from "./helpers/request"
 import {Link, useHistory} from "react-router-dom"
 import {baseUrl} from "./const"
 
@@ -56,21 +56,20 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
   function handleSubmit(e) {
     e.preventDefault()
     let body = {text: replyText}
-    let url = "/posts/create"
+    let url = "/posts"
 
     if (rezweetShown) {
-      body = {...body, rezweetId: post.id}
-      url = "/posts/id/rezweet"
+      url = `/posts/${post.id}/rezweet`
     } else {
       body = {...body, parentid: post.id}
     }
 
-    return sendRequest(url, body, {"token": tokens.token})
+    return httpPost(url, {body, headers: {"token": tokens.token}})
       .then(res => res.json())
       .then((json) => {
         setReplyText("")
 
-        if (url === "/posts/create") {
+        if (url === "/posts") {
           setPost({...post, children: [json.post, ...(post.children || [])]})
         } else {
           history.push("/post/" + json.post.id)
@@ -82,7 +81,7 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
   }
 
   function likePost() {
-    return sendRequest("/posts/id/like", {post: post.id}, {"token": tokens.token})
+    return httpPost(`/posts/${post.id}/like`, {headers: {"token": tokens.token}})
       .then(res => res.json())
       .then(() => {
         setReplyText("")

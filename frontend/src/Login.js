@@ -1,6 +1,6 @@
 import React, {useState} from "react"
 import { Redirect } from 'react-router-dom'
-import {sendRequest} from "./helpers/request"
+import {post} from "./helpers/request"
 
 export default function Login(props) {
   const [username, setUsername] = useState("")
@@ -10,7 +10,7 @@ export default function Login(props) {
 
   function handleSubmit(e) {
     e.preventDefault()
-    return sendRequest("/auth/token/get", {username, password})
+    return post("/auth/login", {body: {username, password}})
       .then(res => res.json())
       .then(json => {
         setMessage("Success: Logged In")

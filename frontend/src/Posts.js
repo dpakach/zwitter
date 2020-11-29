@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react"
-import {sendRequest, sendFileUploadRequest} from "./helpers/request"
+import {get, post, sendFileUploadRequest} from "./helpers/request"
 import Post from "./Post"
 
 function Posts(props) {
@@ -9,7 +9,7 @@ function Posts(props) {
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    sendRequest("/posts/get", {}, loggedIn ? {"token": tokens.token} : {})
+    get("/posts", {headers: loggedIn ? {"token": tokens.token} : {}})
     .then(res => res.json())
     .then(json => {
       setPosts(json.posts ? json.posts.reverse() : [])
@@ -44,7 +44,7 @@ function Posts(props) {
       }
     }
 
-    return sendRequest("/posts/create", {text: postText, media: fileid}, {"token": props.tokens.token})
+    return post("/posts", {body: {text: postText, media: fileid}, headers: {"token": props.tokens.token}})
       .then(res => res.json())
       .then((json) => {
         setPosts([json.post, ...posts])

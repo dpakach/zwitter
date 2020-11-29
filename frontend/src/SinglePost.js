@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react"
-import {sendRequest} from "./helpers/request"
+import {get} from "./helpers/request"
 import Post from "./Post"
 
 function SinglePost(props) {
@@ -10,7 +10,7 @@ function SinglePost(props) {
 
   useEffect(() => {
     if (postId) {
-      sendRequest("/posts/get/id", {id: postId})
+      get(`/posts/${postId}`, {})
       .then(res => res.json())
       .then(json => {
         setPost(json.post)

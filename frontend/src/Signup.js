@@ -1,6 +1,6 @@
 import React, {useState} from "react"
 import { Redirect } from 'react-router-dom'
-import {sendRequest} from "./helpers/request"
+import {post} from "./helpers/request"
 
 export default function Signup(props) {
   const [username, setUsername] = useState("")
@@ -10,7 +10,7 @@ export default function Signup(props) {
 
   function handleSubmit(e) {
     e.preventDefault()
-    return sendRequest("/users/create", {username, password})
+    return post("/users", {body: {username, password}})
       .then(res => res.json())
       .then(() => {
         setMessage("Success: Created User")

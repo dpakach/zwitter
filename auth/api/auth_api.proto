@@ -54,14 +54,14 @@ service AuthService {
   }
 	rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {
      option (google.api.http) = {
-       post: "/auth/token/get"
+       post: "/auth/login"
        body: "*"
      };
   };
 
   rpc AuthenticateToken(AuthenticateTokenRequest) returns (AuthenticateTokenResponse) {
      option (google.api.http) = {
-       post: "/auth/token/auth"
+       post: "/auth/token"
        body: "*"
      };
   }
