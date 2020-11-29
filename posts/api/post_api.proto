@@ -69,37 +69,34 @@ service PostsService {
   }
 	rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {
      option (google.api.http) = {
-       post: "/posts/create"
+       post: "/posts"
        body: "*"
      };
   };
 	rpc GetPosts(EmptyData) returns (GetPostsResponse) {
      option (google.api.http) = {
-       post: "/posts/get"
-       body: "*"
+       get: "/posts"
      };
   };
 	rpc GetPost(GetPostRequest) returns (GetPostResponse) {
      option (google.api.http) = {
-       post: "/posts/get/id"
-       body: "*"
+       get: "/posts/{id=*}"
      };
   };
 	rpc GetPostChilds(GetPostRequest) returns (GetPostsResponse) {
      option (google.api.http) = {
-       post: "/posts/id/childs"
-       body: "*"
+       get: "/posts/{id=*}/childs"
      };
   };
   rpc LikePost(LikeRequest) returns (EmptyData) {
      option (google.api.http) = {
-       post: "/posts/id/like"
+       post: "/posts/{post=*}/like"
        body: "*"
      };
   };
   rpc Rezweet(RezweetRequest) returns (CreatePostResponse) {
      option (google.api.http) = {
-       post: "/posts/id/rezweet"
+       post: "/posts/{rezweetId=*}/rezweet"
        body: "*"
      };
   };

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
 import Posts from "./Posts";
 import Login from './Login'
 import Signup from './Signup'
-import {sendRequest} from "./helpers/request"
+import {post} from "./helpers/request"
 import SinglePost from "./SinglePost";
 import Docs from "./Docs";
 
@@ -18,7 +18,7 @@ export default function App() {
   function handleLogout() {
     window.localStorage.removeItem("tokens")
     setLoggedIn(false)
-    return sendRequest("/auth/logout", {"token": tokens.token})
+    return post("/auth/logout", {headers: {"token": tokens.token}})
       .then(res => res.json())
       .then(() => {
         setTokens({})
