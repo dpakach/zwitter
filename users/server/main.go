@@ -34,8 +34,11 @@ func main() {
 	logger := zlog.New()
 
 	service := &service.Service{
-		Config:   cfg,
-		AuthRPCs: []string{},
+		Config: cfg,
+		AuthRPCs: []string{
+			"SetProfile",
+			"GetProfile",
+		},
 		RegisterGrpcServer: func(serv *grpc.Server, log *zlog.ZwitLogger) {
 			userspb.RegisterUsersServiceServer(serv, &api.Server{Log: log})
 		},

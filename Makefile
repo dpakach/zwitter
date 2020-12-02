@@ -11,6 +11,8 @@ service: ## build the binary and docker image of $SERVICE service
 	make && make docker-build
 
 restart-service: ## Restart a service $SERVICE
+	make -C $(SERVICE) api
+	make -C $(SERVICE)
 	docker-compose -f ./docker-compose.envoy.yml restart $(SERVICE)
 
 build: frontend-build ## Build the binaries and docker-images for all the services

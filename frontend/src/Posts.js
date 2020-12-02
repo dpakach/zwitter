@@ -28,7 +28,6 @@ function Posts(props) {
       file = input.files[0]
     } catch (e) {
     }
-    console.log(file)
     if (file) {
       await sendFileUploadRequest(`/media/${file.name}`, file, {
         token: props.tokens.token
@@ -36,7 +35,6 @@ function Posts(props) {
       .then(body => body.json())
       .then(data => {
         fileid = data.id
-        console.log(data)
       })
       if (!fileid) {
         setMessage("Failed while trying to upload media")

@@ -33,23 +33,18 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
     const created = new Date(rezweet.created * 1000)
     const formattedDate = created.toLocaleTimeString("en-US", dateOptions)
     return (
-       <div style={{
-         margin: "10px",
-         border: "2px solid #333",
-         padding: "10px",
-         maxWidth: "400px",
-       }}>
-          <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${rezweet.id}`}>
-            <p>{rezweet.text}</p>
-          </Link>
+      <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${rezweet.id}`}>
+       <div className="post-section rezweet-section">
+          <p>{rezweet.text}</p>
           {rezweet.media && (
             <img src={`${baseUrl}/media/${rezweet.media}`} alt={post.text} style={{width: '400px'}} />
           )}
-          <b>@{rezweet.author.username}</b>
-          <br/>
-          {formattedDate}
-          <br/>
+          <Link className="username" to={`/profile/${rezweet.author.username}`}>
+            <b>@{rezweet.author.username}</b>
+          </Link>
+          <p>{formattedDate}</p>
         </div>
+      </Link>
     )
   }
 
@@ -108,41 +103,39 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
   }
 
   return(
+    <>
+    {Object.keys(post.rezweet).length === 0 ?
+      <></> :
+      <>
+        <small>
+          <Link className="username" to={`/profile/${post.author.username}`}>
+            @{post.author.username}
+          </Link>
+          {' rezweeted'}
+        </small>
+      </>
+    }
    <div style={{
      marginLeft: `${level === 0 ? 0 : 20}px`,
      borderLeft: level === 0 ? "" : "2px solid #333",
-     paddingLeft: "10px",
-     marginBottom: "5rem",
-   }}>
-      {Object.keys(post.rezweet).length === 0 ?
-        <></> :
-        <>
-          <small>@{post.author.username} rezweeted</small>
-          <br/>
-        </>
-      }
-      {clickable ? 
-        (
-          <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${post.id}`}>
-            {post.text}
-          </Link>
-        ):(
-          <span>{post.text}</span>
-        )
-      }
-      <br/>
-      {(post.rezweet === {}) ?
-        <></> :
-        getRezweet(post.rezweet)
-      }
-      <b>@{post.author.username}</b>
-      <br/>
-      {formattedDate}
-      <br/>
-      {post.media && (
-        <img src={`${baseUrl}/media/${post.media}`} alt={post.text} style={{width: '400px'}} />
-      )}
-      <br/>
+   }} className={clickable && "post-section"}>
+      <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${post.id}`}>
+        <p>{post.text}</p>
+        {(post.rezweet === {}) ?
+          <></> :
+          getRezweet(post.rezweet)
+        }
+        <Link className="username" to={`/profile/${post.author.username}`}>
+          <b>@{post.author.username}</b>
+        </Link>
+        <p>{formattedDate}</p>
+        {post.media && (
+          <>
+            <img src={`${baseUrl}/media/${post.media}`} alt={post.text} style={{width: '400px'}} />
+            <br/>
+          </>
+        )}
+      </Link>
       {!loggedIn || (
         <>
           <button onClick={() => toggleReplyRezweet(reactTypes.REPLY)}>reply</button>
@@ -168,11 +161,11 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
           </form>
         </>
       )}
-
       {post.children && post.children.map(child => (
           <Post tokens={tokens} post={child} key={child.id} level={level + 1} loggedIn={loggedIn} clickable={true} />
       ))}
     </div>
+    </>
   )
 }
 

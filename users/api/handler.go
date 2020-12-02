@@ -22,6 +22,15 @@ func (s *Server) SayHello(ctx context.Context, in *userspb.PingMessage) (*usersp
 	return &userspb.PingMessage{Greeting: "Hello from Users service"}, nil
 }
 
+func profilePb(profile *data.Profile) *userspb.Profile {
+	return &userspb.Profile{
+		UserId:      profile.UserId,
+		DisplayName: profile.DisplayName,
+		Gender:      userspb.Gender(profile.Gender),
+		DateOfBirth: profile.Birthday,
+	}
+}
+
 func userPb(user *data.User) *userspb.User {
 	return &userspb.User{
 		Id:       user.ID,
@@ -39,7 +48,10 @@ func (s *Server) CreateUser(ctx context.Context, in *userspb.CreateUserRequest) 
 	ts := time.Now().Unix()
 	user := &data.User{Username: in.GetUsername(), Created: int64(ts), Password: auth.NewSHA256(in.GetPassword())}
 
-	data.UserStore.AddDbList(user)
+	userId := data.UserStore.AddDbList(user)
+	profile := &data.Profile{UserId: userId, Gender: int(userspb.Gender_NOT_SPECIFIED)}
+	data.ProfileStore.AddDbList(profile)
+
 	s.Log.Info("Successfully created a new user")
 
 	return &userspb.CreateUserResponse{User: userPb(user)}, nil
@@ -86,4 +98,61 @@ func (s *Server) GetUserByID(ctx context.Context, in *userspb.GetUserByIDRequest
 		return nil, status.Errorf(codes.NotFound, "User not found")
 	}
 	return &userspb.GetUserResponse{User: userPb(user)}, nil
+}
+
+func (s *Server) GetUserProfile(ctx context.Context, in *userspb.GetProfileRequest) (*userspb.GetProfileResponse, error) {
+	s.Log.Info("get user profile")
+	user := data.UserStore.GetByUsername(in.GetUsername())
+	if user == nil {
+		s.Log.Errorf("Failed to Fetch the user: User doesn't exists")
+		return nil, status.Errorf(codes.NotFound, "User not found")
+	}
+	profile := data.ProfileStore.GetByID(user.ID)
+	return &userspb.GetProfileResponse{Profile: profilePb(profile), User: userPb(user)}, nil
+}
+
+func (s *Server) GetProfile(ctx context.Context, in *userspb.EmptyData) (*userspb.GetProfileResponse, error) {
+	s.Log.Info("get profile")
+	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
+	if !ok {
+		s.Log.Errorf("Failed to create a new post: User not authenticated properly")
+		return nil, status.Errorf(codes.Unauthenticated, "Invalid userid")
+	}
+
+	s.Log.Info(user.Username)
+	s.Log.Info(string(user.Id))
+	dbUser := data.UserStore.GetByID(user.Id)
+	s.Log.Info(dbUser.Username)
+	s.Log.Info(string(dbUser.ID))
+	if dbUser == nil {
+		s.Log.Errorf("Failed to Fetch the user: User doesn't exists")
+		return nil, status.Errorf(codes.NotFound, "User not found")
+	}
+	profile := data.ProfileStore.GetByID(dbUser.ID)
+	return &userspb.GetProfileResponse{Profile: profilePb(profile), User: userPb(dbUser)}, nil
+}
+
+func (s *Server) SetProfile(ctx context.Context, in *userspb.SetProfileRequest) (*userspb.GetProfileResponse, error) {
+	ctxUser, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
+	if !ok {
+		s.Log.Errorf("Failed to set the user profile: User not authenticated properly")
+		return nil, status.Errorf(codes.Unauthenticated, "Invalid userid")
+	}
+
+	user := data.UserStore.GetByID(ctxUser.Id)
+	if user == nil {
+		s.Log.Errorf("Failed to Fetch the user: User doesn't exists")
+		return nil, status.Errorf(codes.NotFound, "User not found")
+	}
+	profile := data.ProfileStore.GetByID(user.ID)
+	if in.GetProfile().GetDisplayName() != "" {
+		profile.DisplayName = in.GetProfile().GetDisplayName()
+	}
+	if in.GetProfile().GetDateOfBirth() != "" {
+		profile.Birthday = in.GetProfile().GetDateOfBirth()
+	}
+	if in.GetProfile().GetGender() != userspb.Gender_NOT_SPECIFIED {
+		profile.Gender = int(in.GetProfile().GetGender())
+	}
+	return &userspb.GetProfileResponse{Profile: profilePb(profile), User: userPb(user)}, nil
 }

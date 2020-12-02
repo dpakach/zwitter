@@ -10,6 +10,28 @@ body {
   min-height: 100%;
 }
 
+.post-section {
+  color: #ccc;
+  max-width: 600px;
+  padding-left: 10px;
+  // border: 2px solid #333;
+
+  p {
+    color: #ccc;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+.rezweet-section {
+   margin: 10px;
+   padding: 10px;
+   max-width: 400px;
+   border: 2px solid #333;
+}
+
 .container {
   padding: 2rem;
   width: 900px;
@@ -17,5 +39,9 @@ body {
 }
 
 a {
+  color: #9cd7ff;
+}
+
+.username {
   color: #9cd7ff;
 }

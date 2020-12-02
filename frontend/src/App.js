@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
 import Posts from "./Posts";
 import Login from './Login'
 import Signup from './Signup'
+import ProfilePage from './ProfilePage'
 import {post} from "./helpers/request"
 import SinglePost from "./SinglePost";
 import Docs from "./Docs";
@@ -48,12 +49,13 @@ export default function App() {
             <Link to="/">Home </Link>
             {loggedIn ? (
               <>
+                <Link to="/profile">Profile </Link>
                 <Link to="#" onClick={handleLogout}> Logout </Link>
               </>
             ) : (
               <>
-              <Link to="/login">Login </Link>
-              <Link to="/signup">Signup </Link>
+                <Link to="/login">Login </Link>
+                <Link to="/signup">Signup </Link>
               </>
             )}
 
@@ -66,6 +68,12 @@ export default function App() {
               </Route>
               <Route exact path="/signup">
                 <Signup loggedIn={loggedIn} />
+              </Route>
+              <Route exact path="/profile">
+                <ProfilePage loggedIn={loggedIn} tokens={tokens} self={true}/>
+              </Route>
+              <Route exact path="/profile/:user">
+                <ProfilePage loggedIn={loggedIn} tokens={tokens}/>
               </Route>
               <Route exact path="/" render={(props) => (
                 <Posts {...props} loggedIn={loggedIn} tokens={tokens} />
