@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -89,6 +90,9 @@ func (s *Service) AuthInterceptor(ctx context.Context, req interface{}, info *gr
 				return handler(ctx, req)
 			}
 		}
+	} else {
+		s.Log.Errorf("Error reading request metadata for %v", info.FullMethod)
+		return nil, errors.New("Failed to read token from request")
 	}
 
 	return handler(ctx, req)

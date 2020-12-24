@@ -17,6 +17,20 @@ message User {
   int64 created=3;
 }
 
+enum Gender {
+  NOT_SPECIFIED=0;
+  MALE=1;
+  FEMALE=2;
+  OTHER=3;
+}
+
+message Profile {
+  int64 userId=1;
+  string displayName=2;
+  string dateOfBirth=3;
+  Gender gender=4;
+}
+
 message CreateUserRequest {
 	string username=1;
 	string password=2;
@@ -52,6 +66,19 @@ message AuthenticateResponse {
   User user=2;
 }
 
+message SetProfileRequest {
+  Profile profile=1;
+}
+
+message GetProfileRequest {
+  string username=1;
+}
+
+message GetProfileResponse {
+  Profile Profile=1;
+  User user=2;
+}
+
 service UsersService {
   rpc SayHello(PingMessage) returns (PingMessage) {
     option (google.api.http) = {
@@ -70,6 +97,11 @@ service UsersService {
        get: "/users"
      };
   };
+  rpc GetProfile(EmptyData) returns (GetProfileResponse) {
+     option (google.api.http) = {
+       get: "/users/profile"
+     };
+  }
 	rpc GetUser(GetUserRequest) returns (GetUserResponse) {
      option (google.api.http) = {
        get: "/users/{username=*}"
@@ -83,8 +115,18 @@ service UsersService {
   };
   rpc GetUserByID(GetUserByIDRequest) returns (GetUserResponse) {
      option (google.api.http) = {
-       post: "/users/{id=*}"
+       get: "/users/id/{id=*}"
+     };
+  }
+  rpc SetProfile(SetProfileRequest) returns (GetProfileResponse) {
+     option (google.api.http) = {
+       post: "/users/profile"
        body: "*"
+     };
+  }
+  rpc GetUserProfile(GetProfileRequest) returns (GetProfileResponse) {
+     option (google.api.http) = {
+       get: "/users/profile/{username=*}"
      };
   }
 }

@@ -38,10 +38,10 @@ func (s *Server) GetToken(ctx context.Context, in *authpb.GetTokenRequest) (*aut
 		s.Log.Warnf("Cannot connect to users service, failed to authenticate: %v", err)
 		return nil, fmt.Errorf("Failed to authenticate user: %v", err.Error())
 	}
-	s.Log.Info("Authenticated new client")
 	if !resp.Auth || resp.User == nil {
 		return nil, fmt.Errorf("Username or password didn't match %v", err.Error())
 	}
+	s.Log.Info("Authenticated new client")
 
 	user := data.User{Username: resp.User.Username, ID: resp.User.Id, Created: resp.User.Created}
 	token, err := auth.CreateToken(user)
