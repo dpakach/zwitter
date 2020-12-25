@@ -52,6 +52,14 @@ Now restart he service with following command
 make restart-service SERVICE=posts
 ```
 
+### Architecture
+Zwitter is composed of five different microservice components. These services are containerized using docker and can be run using docker-composer to start the whole system.
+
+Each of the services have an instance of [envoy proxy](https://www.envoyproxy.io/) running inside their containers, which provides the http entrypoint for the services. All the services then connect to an seperate instance of envoy proxy which provides access to all the services through an single http entrypoint. The web service is mounted at root whereas all the other services are mounted at the endpoint starting their own name.
+
+![zwitter architecture](https://github.com/dpakach/zwitter/blob/master/assets/zwitter.jpg?raw=true)
+
+
 ### Commands
 Run `make help` to get the list of other available make commands
 ```
