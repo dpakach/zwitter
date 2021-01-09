@@ -41,24 +41,38 @@ jobs:
     - name: fmt
       run: diff -u <(echo -n) <(gofmt -d ./)
 
-    #- name: Build-Auth
-      #run: |
-        #export GOPATH=$HOME/go
-        #cd auth
-        #make
-        #cd ..
+    - name: Build-Auth
+      run: |
+        cd auth
+        make
+        cd ..
 
-    #- name: Build-Posts
-      #run: |
-        #cd posts
-        #make
-        #cd ..
+    - name: Build-Posts
+      run: |
+        cd posts
+        make
+        cd ..
 
-    #- name: Build-Users
-      #run: |
-        #cd users
-        #make
-        #..
+    - name: Build-Users
+      run: |
+        cd users
+        make
+        cd ..
+
+    - name: Build-Media
+      run: |
+        cd media
+        make
+        cd ..
+
+    - name: Build-Web
+      run: |
+        cd web
+        make
+        cd ..
+
+    - name: Full-Build
+      run: make
 
     - name: Test
       run: go test -v ./...
