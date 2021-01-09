@@ -1,4 +1,5 @@
-import React, {useState} from "react"
+import * as React from "react"
+import {useState} from "react"
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
 import Posts from "./Posts";
 import Login from './Login'
@@ -9,12 +10,14 @@ import SinglePost from "./SinglePost";
 import Docs from "./Docs";
 
 import "./styles/main.scss"
+import { Tokens } from "./types/types";
 
 export default function App() {
   const tokensString = window.localStorage.getItem("tokens")
-  const [tokens, setTokens] = useState(JSON.parse(tokensString))
+
+  const [tokens, setTokens]: [Tokens, (Tokens: Tokens) => void] = useState<Tokens>(JSON.parse(tokensString) as Tokens)
   const [loggedIn, setLoggedIn] = useState(tokensString != null)
-  const [message, setMessage] = useState("")
+  const [message, setMessage]: [string, (messages: string) => void] = useState("")
 
   function handleLogout() {
     window.localStorage.removeItem("tokens")
@@ -22,7 +25,7 @@ export default function App() {
     return post("/auth/logout", {headers: {"token": tokens.token}})
       .then(res => res.json())
       .then(() => {
-        setTokens({})
+        setTokens({} as Tokens)
         setLoggedIn(false)
         setMessage("Logged out successfully")
       }, (error) => {
@@ -61,13 +64,13 @@ export default function App() {
 
             <Switch>
               <Route exact path="/post/:id" render={(props) => (
-                <SinglePost {...props} loggedIn={loggedIn} tokens={tokens}/>
+                <SinglePost {...props} loggedIn={loggedIn} tokens={tokens} />
               )}/>
               <Route exact path="/login">
                 <Login loggedIn={loggedIn} setTokens={setTokens} setLoggedIn={setLoggedIn} />
               </Route>
               <Route exact path="/signup">
-                <Signup loggedIn={loggedIn} />
+                <Signup loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
               </Route>
               <Route exact path="/profile">
                 <ProfilePage loggedIn={loggedIn} tokens={tokens} self={true}/>

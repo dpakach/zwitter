@@ -1,11 +1,12 @@
-import React, {useState, useEffect} from "react"
+import * as React from "react"
+import {useState, useEffect} from "react"
 import { RedocStandalone } from "redoc";
 import {baseUrl} from "./const";
 
 function Docs() {
-  const [service, setService] = useState("auth")
+  const [service, setService]: [string, (service: string) => void] = useState("auth")
 
-  function handleChange(e) {
+  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     setService(e.target.value)
   } 
 

@@ -1,12 +1,12 @@
 import {baseUrl} from "../const";
 
-export function sendRequest(endpoint, body={}, headers={}, method="POST") {
+export function sendRequest(endpoint: string, body={}, headers={}, method: string="POST") {
   if (typeof(body) !== "string") {
     body = JSON.stringify(body)
   }
   return fetch(`${baseUrl}${endpoint}`, {
     method,
-    body: (method === "GET") ? undefined : body,
+    body: (method === "GET") ? undefined : body as BodyInit,
     headers
   })
   .then(res => {

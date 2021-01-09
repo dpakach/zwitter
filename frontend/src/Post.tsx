@@ -1,37 +1,41 @@
-import React, {useState, useEffect} from "react"
-import {post as httpPost, get} from "./helpers/request"
+import * as React from "react"
+import {post as httpPost} from "./helpers/request"
 import {Link, useHistory} from "react-router-dom"
 import {baseUrl} from "./const"
+import { Tokens, PostType, CreatePostRequest, PostReactTypes } from "./types/types"
 
-function Post({post: p, tokens, level, loggedIn, clickable}) {
-  const reactTypes = Object.freeze({
-    REPLY: 'reply',
-    REZWEET: 'rezweet',
-    LIKE: 'LIKE',
-  })
-  const [replyShown, setReplyShown] = useState(false)
-  const [rezweetShown, setRezweetShown] = useState(false)
-  const [replyText, setReplyText] = useState("")
-  const [post, setPost] = useState(p)
-  const [message, setMessage] = useState("")
+type PostProps = {
+  loggedIn: boolean,
+  post: PostType,
+  tokens: Tokens,
+  level: number,
+  clickable: boolean,
+}
+
+function Post({post: p, tokens, level, loggedIn, clickable}: PostProps) {
+  const [replyShown, setReplyShown]: [boolean, (replyShown: boolean) => void] = React.useState<boolean>(false)
+  const [rezweetShown, setRezweetShown]: [boolean, (rezweetShown: boolean) => void] = React.useState<boolean>(false)
+  const [replyText, setReplyText]: [string, (replyText: string) => void] = React.useState("")
+  const [post, setPost]: [PostType, (post: PostType) => void] = React.useState<PostType>(p)
+  const [message, setMessage]: [string, (message: string) => void] = React.useState("")
   const history = useHistory()
 
-  const [updateKey, updatePage] = useState(0)
+  const [updateKey, updatePage]: [number, (updateKey: number) => void] = React.useState<number>(0)
 
-  useEffect(() => {
+  React.useEffect(() => {
     setPost(p)
   }, [])
 
-  const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-  const created = new Date(post.created * 1000)
-  const formattedDate = created.toLocaleTimeString("en-US", dateOptions)
+  const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+  const created: Date = new Date(parseInt(post.created) * 1000)
+  const formattedDate: string = created.toLocaleTimeString("en-US", dateOptions)
 
   function getRezweet(rezweet) {
     if (Object.keys(rezweet).length === 0) {
       return
     }
-    const created = new Date(rezweet.created * 1000)
-    const formattedDate = created.toLocaleTimeString("en-US", dateOptions)
+    const created: Date = new Date(rezweet.created * 1000)
+    const formattedDate: string = created.toLocaleTimeString("en-US", dateOptions)
     return (
       <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${rezweet.id}`}>
        <div className="post-section rezweet-section">
@@ -48,10 +52,11 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
     )
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault()
-    let body = {text: replyText}
-    let url = "/posts"
+
+    let body: CreatePostRequest = {text: replyText}
+    let url: string = "/posts"
 
     if (rezweetShown) {
       url = `/posts/${post.id}/rezweet`
@@ -75,26 +80,26 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
       })
   }
 
-  function likePost() {
+  function likePost(): Promise<void> {
     return httpPost(`/posts/${post.id}/like`, {headers: {"token": tokens.token}})
       .then(res => res.json())
       .then(() => {
         setReplyText("")
         if (!post.liked) {
-          setPost({...post, likes: parseInt(post.likes || 0) + 1, liked: true})
+          setPost({...post, likes: String((parseInt(post.likes) || 0) + 1), liked: true})
         } else {
-          setPost({...post, likes: parseInt(post.likes) - 1, liked: false})
+          setPost({...post, likes: String(parseInt(post.likes) - 1), liked: false})
         }
       }, (error) => {
         setMessage("Error: " + error.message)
       })
   }
 
-  function toggleReplyRezweet(type) {
-    if (type == reactTypes.REZWEET) {
+  function toggleReplyRezweet(type: PostReactTypes) {
+    if (type == PostReactTypes.REZWEET) {
       setReplyShown(false)
       setRezweetShown(!rezweetShown)
-    } else if (type == reactTypes.REPLY) {
+    } else if (type == PostReactTypes.REPLY) {
       setRezweetShown(false)
       setReplyShown(!replyShown)
     } else {
@@ -121,7 +126,7 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
    }} className={clickable && "post-section"}>
       <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${post.id}`}>
         <p>{post.text}</p>
-        {(post.rezweet === {}) ?
+        {!post.rezweet ?
           <></> :
           getRezweet(post.rezweet)
         }
@@ -138,8 +143,8 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
       </Link>
       {!loggedIn || (
         <>
-          <button onClick={() => toggleReplyRezweet(reactTypes.REPLY)}>reply</button>
-          <button onClick={() => toggleReplyRezweet(reactTypes.REZWEET)}>rezweet</button>
+          <button onClick={() => toggleReplyRezweet(PostReactTypes.REPLY)}>reply</button>
+          <button onClick={() => toggleReplyRezweet(PostReactTypes.REZWEET)}>rezweet</button>
           <button
             onClick={likePost}
             style={post.liked ? {
@@ -156,7 +161,7 @@ function Post({post: p, tokens, level, loggedIn, clickable}) {
           <form onSubmit={handleSubmit}>
             <textarea placeholder={
               replyShown ? "Reply to the post" : "Retweet this post"
-            } type="text" value={replyText} onChange={(e) => { setReplyText(e.target.value)}} name="text" />
+            } value={replyText} onChange={(e) => { setReplyText(e.target.value)}} name="text" />
             <input type="submit" value="Submit" />
           </form>
         </>

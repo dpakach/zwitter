@@ -1,12 +1,19 @@
-import React, {useState, useEffect} from "react"
+import * as React from "react"
+import {useState, useEffect} from "react"
+import { tokenToString } from "typescript"
 import {get, post, sendFileUploadRequest} from "./helpers/request"
 import Post from "./Post"
+import { CreatePostRequest, Tokens } from "./types/types"
 
-function Posts(props) {
+type PostsProps = {
+  tokens: Tokens, 
+  loggedIn: boolean,
+}
+function Posts(props: PostsProps) {
   const {loggedIn, tokens} = props
-  const [postText, setPostText] = useState("")
+  const [postText, setPostText]: [string, (prop: string) => void] = useState("")
   const [posts, setPosts] = useState([])
-  const [message, setMessage] = useState("")
+  const [message, setMessage]: [string, (prop: string) => void] = useState("")
 
   useEffect(() => {
     get("/posts", {headers: loggedIn ? {"token": tokens.token} : {}})
@@ -21,10 +28,10 @@ function Posts(props) {
   async function handleSubmit(e) {
     e.preventDefault()
 
-    let file = null
-    let fileid
+    let file: File = null
+    let fileid: string
     try {
-      const input = document.getElementById("create-post-media-input")
+      const input = document.getElementById("create-post-media-input") as HTMLInputElement
       file = input.files[0]
     } catch (e) {
     }
@@ -42,7 +49,9 @@ function Posts(props) {
       }
     }
 
-    return post("/posts", {body: {text: postText, media: fileid}, headers: {"token": props.tokens.token}})
+    const body: CreatePostRequest = {text: postText, media: fileid}
+
+    return post("/posts", {body , headers: {"token": props.tokens.token}})
       .then(res => res.json())
       .then((json) => {
         setPosts([json.post, ...posts])
@@ -59,7 +68,7 @@ function Posts(props) {
       {!message || <p>{message}</p>}
       { !props.loggedIn ||
         <form onSubmit={handleSubmit}>
-          <textarea placeholder="Create a new post" type="text" value={postText} onChange={(e) => { setPostText(e.target.value)}} name="text" />
+          <textarea placeholder="Create a new post" value={postText} onChange={(e) => { setPostText(e.target.value)}} name="text" />
           <input type="submit" value="Submit" />
           <input type="file" id="create-post-media-input" />
         </form>

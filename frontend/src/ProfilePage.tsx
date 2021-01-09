@@ -1,35 +1,37 @@
-import React, {useState, useEffect} from "react"
+import * as React from "react"
+import {useState, useEffect} from "react"
 import { Redirect, useParams } from 'react-router-dom'
 import {get, post} from "./helpers/request"
-import {getDate, getTimeStamp} from "./helpers/date"
+import {getDate} from "./helpers/date"
+import {User, Tokens, Genders } from "./types/types"
 
-export default function ProfilePage(props) {
+type ProfileProps = {
+  tokens: Tokens,
+  loggedIn: boolean,
+  self?: boolean,
+}
+
+function ProfilePage(props: ProfileProps) {
   const {tokens, loggedIn, self} = props
 
-  const genders = Object.freeze({
-    "NOT_SPECIFIED": 0,
-    "MALE": 1,
-    "FEMALE": 2,
-    "OTHER": 3,
-  })
-
-  function getGenderName(id) {
-    const gender = Object.keys(genders).find(key => genders[key] === id)
-    if (gender) {
-      return gender.toLowerCase()
-    } else {
-      return "not specified"
+  function getGenderName(id: number) {
+    for (var enumMember in Genders) {
+      var isValueProperty = parseInt(enumMember, 10) >= 0
+      if (isValueProperty) {
+         return Genders[enumMember].toLowerCase()
+      }
     }
+    return "not specified"
   }
+  
+  const params = useParams<Record<string, string | undefined>>();
 
-  const params = useParams();
-
-  const [profileUser] = useState(params.user)
-  const [message, setMessage] = useState("")
-  const [displayName, setDisplayName] = useState("")
-  const [gender, setGender] = useState(0)
-  const [birthday, setBirthday] = useState("")
-  const [user, setUser] = useState({})
+  const [profileUser, setProfileUser] = useState(params.user)
+  const [message, setMessage]: [string, (prop: string) => void] = useState("")
+  const [displayName, setDisplayName]: [string, (prop: string) => void] = useState("")
+  const [gender, setGender] = useState(Genders.NOT_SPECIFIED)
+  const [birthday, setBirthday]: [string, (prop: string) => void] = useState("")
+  const [user, setUser] = useState({} as User)
 
 
   useEffect(() => {
@@ -37,19 +39,19 @@ export default function ProfilePage(props) {
     if (profileUser) {
       url += `/${profileUser}`
     }
-    return get(url, {headers: {"token": tokens.token}})
+    get(url, { headers: { "token": tokens.token } })
     .then(res => res.json())
     .then(data => {
       setDisplayName(data.Profile['displayName'] || "")
       setBirthday(data.Profile['dateOfBirth'] || "")
-      setGender(genders[data.Profile['gender']] || gender.NOT_SPECIFIED)
+      setGender(data.Profile['gender'] || Genders.NOT_SPECIFIED)
       setUser(data.user)
-    })
+    })   
   }, [])
 
   function handleSubmit(e) {
     e.preventDefault()
-    return post("/users/profile", {body: {profile: {userId: user.id, displayName, gender: parseInt(gender), dateOfBirth: birthday}}, headers: {"token": tokens.token}})
+    return post("/users/profile", {body: {profile: {userId: user.id, displayName, gender: gender, dateOfBirth: birthday}}, headers: {"token": tokens.token}})
       .then(res => res.json())
       .then(() => {
         setMessage("Success: updated User Profile")
@@ -85,11 +87,11 @@ export default function ProfilePage(props) {
             <label htmlFor="gender">
               Gender:
             </label>
-              <select id="gender" value={gender} onChange={(e) => { setGender(e.target.value)}} name="gender">
-                <option value="0" >Not Specified</option>
-                <option value="1" >Male</option>
-                <option value="2" >Female</option>
-                <option value="3" >Other</option>
+              <select id="gender" value={gender} onChange={(e) => { setGender(parseInt(e.target.value))}} name="gender">
+                <option value={Genders.NOT_SPECIFIED} >Not Specified</option>
+                <option value={Genders.MALE} >Male</option>
+                <option value={Genders.FEMALE} >Female</option>
+                <option value={Genders.OTHER} >Other</option>
               </select>
             <label>
               Birthday:
@@ -103,3 +105,5 @@ export default function ProfilePage(props) {
   </>
   )
 }
+
+export default ProfilePage

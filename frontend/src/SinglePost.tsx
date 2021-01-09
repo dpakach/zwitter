@@ -1,9 +1,21 @@
-import React, {useState, useEffect} from "react"
+import * as React from "react"
+import {useState, useEffect} from "react"
 import {get} from "./helpers/request"
 import Post from "./Post"
+import {RouteComponentProps} from "react-router-dom";
+import { Tokens } from "./types/types";
 
-function SinglePost(props) {
-  const [message, setMessage] = useState("")
+type TParams = {
+  id: string
+}
+
+interface SinglePostParams extends RouteComponentProps<TParams> {
+  tokens: Tokens,
+  loggedIn: boolean,
+}
+
+function SinglePost(props: SinglePostParams) {
+  const [message, setMessage]: [string, (message: string) => void] = useState("")
   const [post, setPost] = useState(null)
   const [postId, setPostId] = useState(0)
 
@@ -22,7 +34,7 @@ function SinglePost(props) {
   
 
   useEffect(() => {
-    setPostId(props.match.params.id)
+    setPostId(parseInt(props.match.params.id))
   }, [props.match.params.id])
 
   return (
@@ -30,7 +42,7 @@ function SinglePost(props) {
       <h2>Post</h2>
       {message && <p>{message}</p>}
       {post && (
-        <Post post={post} tokens={props.tokens} level={0} {...props} clickable={false} setPostId={setPostId} />
+        <Post post={post} tokens={props.tokens} level={0} {...props} clickable={false} />
       )}
     </>
   )

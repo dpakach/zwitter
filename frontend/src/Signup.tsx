@@ -1,21 +1,27 @@
-import React, {useState} from "react"
+import * as React from "react"
+import {useState} from "react"
 import { Redirect } from 'react-router-dom'
 import {post} from "./helpers/request"
+import { UserRequest } from "./types/types"
 
-export default function Login(props) {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [message, setMessage] = useState("")
-  const [completed, setCompleted] = useState(false)
+type signupProps = {
+  loggedIn: boolean,
+  setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>,
+}
 
-  function handleSubmit(e) {
+export default function Signup(props: signupProps) {
+  const [username, setUsername]: [string, (username: string) => void] = useState("")
+  const [password, setPassword]: [string, (password: string) => void] = useState("")
+  const [message, setMessage]: [string, (message: string) => void] = useState("")
+  const [completed, setCompleted]: [boolean, (completed: boolean) => void] = useState<boolean>(false)
+
+  function handleSubmit(e: React.FormEvent) {
+    const body: UserRequest = {username, password}
     e.preventDefault()
-    return post("/auth/login", {body: {username, password}})
+    return post("/users", {body})
       .then(res => res.json())
-      .then(json => {
-        setMessage("Success: Logged In")
-        window.localStorage.setItem("tokens", JSON.stringify(json))
-        props.setTokens(json)
+      .then(() => {
+        setMessage("Success: Created User")
         setTimeout(() => {
           props.setLoggedIn(true)
           setCompleted(true)
@@ -29,7 +35,7 @@ export default function Login(props) {
       {!(completed || props.loggedIn) || <Redirect to="/" />}
 
       <p>{message}</p>
-      <h2>Login</h2>
+      <h2>Signup</h2>
       <form onSubmit={handleSubmit}>
         <label>
           Username:
