@@ -37,9 +37,16 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
+        cd frontend
+        yarn
 
-    - name: fmt
+    - name: Go-Fmt
       run: diff -u <(echo -n) <(gofmt -d ./)
+
+    - name: Lint-js
+      run: |
+        cd frontend
+        yarn lint
 
     - name: Build-Auth
       run: |
