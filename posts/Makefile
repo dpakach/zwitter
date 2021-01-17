@@ -7,6 +7,7 @@ SERVER_PKG_BUILD := "${PKG}/server"
 CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 VERSION := 1.0
+GOPATH ?= '${HOME}/go'
 
 .PHONY: all api server client
 
@@ -17,7 +18,8 @@ api/postspb/api.pb.go: api/post_api.proto
 		-I/usr/local/include \
 		-I${GOPATH}/src \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-		--go_out=plugins=grpc:api \
+		--go_out=api \
+		--go-grpc_out=api \
 		api/post_api.proto
 
 api/postspb/api.pb.gw.go: api/post_api.proto
@@ -33,7 +35,7 @@ swagger: api
 		-I/usr/local/include \
 		-I${GOPATH}/src \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-		--swagger_out=logtostderr=true:./swagger \
+		--openapiv2_out=logtostderr=true:./swagger \
 		api/post_api.proto
 
 docs: swagger ## Generate the swagger documentation files

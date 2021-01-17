@@ -14,6 +14,7 @@ import (
 )
 
 type Server struct {
+	userspb.UnimplementedUsersServiceServer
 	Log *zlog.ZwitLogger
 }
 
