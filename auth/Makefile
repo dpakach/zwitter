@@ -1,15 +1,13 @@
 SERVER_OUT := "bin/server"
-CLIENT_OUT := "bin/client"
 API_OUT := "api/authpb/api.pb.go"
 API_REST_OUT := "api/authpb/api.pb.gw.go"
 PKG := "github.com/dpakach/zwitter/auth"
 SERVER_PKG_BUILD := "${PKG}/server"
-CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 VERSION := 1.0
 GOPATH ?= '${HOME}/go'
 
-.PHONY: all api server client
+.PHONY: all api server
 
 all: server
 
@@ -48,11 +46,8 @@ dep: ## Download go dependencies
 server: dep ## Build the server binary
 	@go build -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
 
-client: dep ## Build the client binary
-	@go build -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
-
 clean: ## Clean all build products
-	@rm -rf $(SERVER_OUT) $(CLIENT_OUT)
+	@rm -rf $(SERVER_OUT)
 
 docker-build: ## Build the docker image of the service
 	docker build -t zwiter/auth:$(VERSION) --build-arg service_name=auth -f ../service/Dockerfile  .. --no-cache

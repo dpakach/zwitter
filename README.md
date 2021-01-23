@@ -101,7 +101,6 @@ Available commands
 
 api                            Auto-generate grpc go sources
 clean                          Clean all build products
-client                         Build the client binary
 dep                            Download go dependencies
 docker-build                   Build the docker image of the service
 docker-run                     Build and run the service in a docker container
