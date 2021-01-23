@@ -9,7 +9,7 @@ import (
 	"github.com/dpakach/zwitter/pkg/config"
 	zlog "github.com/dpakach/zwitter/pkg/log"
 	"github.com/dpakach/zwitter/pkg/service"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	"github.com/dpakach/zwitter/users/api"
 	"github.com/dpakach/zwitter/users/api/userspb"

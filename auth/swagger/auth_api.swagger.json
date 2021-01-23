@@ -4,6 +4,11 @@
     "title": "auth_api.proto",
     "version": "version not set"
   },
+  "tags": [
+    {
+      "name": "AuthService"
+    }
+  ],
   "consumes": [
     "application/json"
   ],
@@ -11,6 +16,38 @@
     "application/json"
   ],
   "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthService_GetToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/authpbGetTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/authpbGetTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
     "/auth/ping": {
       "post": {
         "operationId": "AuthService_SayHello",
@@ -22,9 +59,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -43,7 +80,7 @@
         ]
       }
     },
-    "/auth/token/auth": {
+    "/auth/token": {
       "post": {
         "operationId": "AuthService_AuthenticateToken",
         "responses": {
@@ -54,9 +91,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -67,38 +104,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/authpbAuthenticateTokenRequest"
-            }
-          }
-        ],
-        "tags": [
-          "AuthService"
-        ]
-      }
-    },
-    "/auth/token/get": {
-      "post": {
-        "operationId": "AuthService_GetToken",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/authpbGetTokenResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response",
-            "schema": {
-              "$ref": "#/definitions/runtimeError"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/authpbGetTokenRequest"
             }
           }
         ],
@@ -118,9 +123,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -153,8 +158,7 @@
       "type": "object",
       "properties": {
         "auth": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         },
         "user": {
           "$ref": "#/definitions/authpbUser"
@@ -180,6 +184,9 @@
         },
         "refreshToken": {
           "type": "string"
+        },
+        "user": {
+          "$ref": "#/definitions/authpbUser"
         }
       }
     },
@@ -226,7 +233,7 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "type_url": {
+        "typeUrl": {
           "type": "string"
         },
         "value": {
@@ -235,12 +242,9 @@
         }
       }
     },
-    "runtimeError": {
+    "rpcStatus": {
       "type": "object",
       "properties": {
-        "error": {
-          "type": "string"
-        },
         "code": {
           "type": "integer",
           "format": "int32"

@@ -4,6 +4,11 @@
     "title": "post_api.proto",
     "version": "version not set"
   },
+  "tags": [
+    {
+      "name": "PostsService"
+    }
+  ],
   "consumes": [
     "application/json"
   ],
@@ -11,7 +16,27 @@
     "application/json"
   ],
   "paths": {
-    "/posts/create": {
+    "/posts": {
+      "get": {
+        "operationId": "PostsService_GetPosts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbGetPostsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "PostsService"
+        ]
+      },
       "post": {
         "operationId": "PostsService_CreatePost",
         "responses": {
@@ -22,9 +47,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -35,166 +60,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/postspbCreatePostRequest"
-            }
-          }
-        ],
-        "tags": [
-          "PostsService"
-        ]
-      }
-    },
-    "/posts/get": {
-      "post": {
-        "operationId": "PostsService_GetPosts",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/postspbGetPostsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response",
-            "schema": {
-              "$ref": "#/definitions/runtimeError"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/postspbEmptyData"
-            }
-          }
-        ],
-        "tags": [
-          "PostsService"
-        ]
-      }
-    },
-    "/posts/get/id": {
-      "post": {
-        "operationId": "PostsService_GetPost",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/postspbGetPostResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response",
-            "schema": {
-              "$ref": "#/definitions/runtimeError"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/postspbGetPostRequest"
-            }
-          }
-        ],
-        "tags": [
-          "PostsService"
-        ]
-      }
-    },
-    "/posts/id/childs": {
-      "post": {
-        "operationId": "PostsService_GetPostChilds",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/postspbGetPostsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response",
-            "schema": {
-              "$ref": "#/definitions/runtimeError"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/postspbGetPostRequest"
-            }
-          }
-        ],
-        "tags": [
-          "PostsService"
-        ]
-      }
-    },
-    "/posts/id/like": {
-      "post": {
-        "operationId": "PostsService_LikePost",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/postspbEmptyData"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response",
-            "schema": {
-              "$ref": "#/definitions/runtimeError"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/postspbLikeRequest"
-            }
-          }
-        ],
-        "tags": [
-          "PostsService"
-        ]
-      }
-    },
-    "/posts/id/rezweet": {
-      "post": {
-        "operationId": "PostsService_Rezweet",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/postspbCreatePostResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response",
-            "schema": {
-              "$ref": "#/definitions/runtimeError"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/postspbRezweetRequest"
             }
           }
         ],
@@ -214,9 +79,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -227,6 +92,146 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/postspbPingMessage"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "operationId": "PostsService_GetPost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbGetPostResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/{id}/childs": {
+      "get": {
+        "operationId": "PostsService_GetPostChilds",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbGetPostsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/{post}/like": {
+      "post": {
+        "operationId": "PostsService_LikePost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbEmptyData"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "post",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbLikeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PostsService"
+        ]
+      }
+    },
+    "/posts/{rezweetId}/rezweet": {
+      "post": {
+        "operationId": "PostsService_Rezweet",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/postspbCreatePostResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "rezweetId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postspbRezweetRequest"
             }
           }
         ],
@@ -262,15 +267,6 @@
     },
     "postspbEmptyData": {
       "type": "object"
-    },
-    "postspbGetPostRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
     },
     "postspbGetPostResponse": {
       "type": "object",
@@ -340,8 +336,7 @@
           "format": "int64"
         },
         "liked": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         },
         "media": {
           "type": "string"
@@ -378,7 +373,7 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "type_url": {
+        "typeUrl": {
           "type": "string"
         },
         "value": {
@@ -387,12 +382,9 @@
         }
       }
     },
-    "runtimeError": {
+    "rpcStatus": {
       "type": "object",
       "properties": {
-        "error": {
-          "type": "string"
-        },
         "code": {
           "type": "integer",
           "format": "int32"

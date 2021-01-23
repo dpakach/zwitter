@@ -4,7 +4,7 @@ SERVER_PKG_BUILD := "${PKG}/server"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 VERSION := 1.0
 
-.PHONY: all api server client
+.PHONY: all api server
 
 all: server
 
@@ -20,7 +20,7 @@ server: dep api ## Build the server binary
 	@go build -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
 
 clean: ## clean all build products
-	@rm -rf $(SERVER_OUT) $(CLIENT_OUT)
+	@rm -rf $(SERVER_OUT)
 
 docker-build: ## Build the docker image for the service
 	docker build -t zwiter/media:$(VERSION) --build-arg service_name=media -f ../service/Dockerfile  .. --no-cache

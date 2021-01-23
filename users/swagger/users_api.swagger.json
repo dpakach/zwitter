@@ -4,6 +4,11 @@
     "title": "users_api.proto",
     "version": "version not set"
   },
+  "tags": [
+    {
+      "name": "UsersService"
+    }
+  ],
   "consumes": [
     "application/json"
   ],
@@ -11,39 +16,27 @@
     "application/json"
   ],
   "paths": {
-    "/users/auth": {
-      "post": {
-        "operationId": "UsersService_Authenticate",
+    "/users": {
+      "get": {
+        "operationId": "UsersService_GetUsers",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/userspbAuthenticateResponse"
+              "$ref": "#/definitions/userspbGetUsersResponse"
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/userspbAuthenticateRequest"
-            }
-          }
-        ],
         "tags": [
           "UsersService"
         ]
-      }
-    },
-    "/users/create": {
+      },
       "post": {
         "operationId": "UsersService_CreateUser",
         "responses": {
@@ -54,9 +47,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -75,20 +68,20 @@
         ]
       }
     },
-    "/users/get": {
+    "/users/auth": {
       "post": {
-        "operationId": "UsersService_GetUsers",
+        "operationId": "UsersService_Authenticate",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/userspbGetUsersResponse"
+              "$ref": "#/definitions/userspbAuthenticateResponse"
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -98,7 +91,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/userspbEmptyData"
+              "$ref": "#/definitions/userspbAuthenticateRequest"
             }
           }
         ],
@@ -107,8 +100,8 @@
         ]
       }
     },
-    "/users/id": {
-      "post": {
+    "/users/id/{id}": {
+      "get": {
         "operationId": "UsersService_GetUserByID",
         "responses": {
           "200": {
@@ -118,20 +111,19 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "id",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/userspbGetUserByIDRequest"
-            }
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -150,9 +142,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -171,20 +163,40 @@
         ]
       }
     },
-    "/users/username": {
-      "post": {
-        "operationId": "UsersService_GetUser",
+    "/users/profile": {
+      "get": {
+        "operationId": "UsersService_GetProfile",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/userspbGetUserResponse"
+              "$ref": "#/definitions/userspbGetProfileResponse"
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UsersService"
+        ]
+      },
+      "post": {
+        "operationId": "UsersService_SetProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userspbGetProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -194,8 +206,68 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/userspbGetUserRequest"
+              "$ref": "#/definitions/userspbSetProfileRequest"
             }
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/users/profile/{username}": {
+      "get": {
+        "operationId": "UsersService_GetUserProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userspbGetProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UsersService"
+        ]
+      }
+    },
+    "/users/{username}": {
+      "get": {
+        "operationId": "UsersService_GetUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userspbGetUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -208,7 +280,7 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "type_url": {
+        "typeUrl": {
           "type": "string"
         },
         "value": {
@@ -217,12 +289,9 @@
         }
       }
     },
-    "runtimeError": {
+    "rpcStatus": {
       "type": "object",
       "properties": {
-        "error": {
-          "type": "string"
-        },
         "code": {
           "type": "integer",
           "format": "int32"
@@ -253,8 +322,7 @@
       "type": "object",
       "properties": {
         "Auth": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         },
         "user": {
           "$ref": "#/definitions/userspbUser"
@@ -280,23 +348,24 @@
         }
       }
     },
-    "userspbEmptyData": {
-      "type": "object"
+    "userspbGender": {
+      "type": "string",
+      "enum": [
+        "NOT_SPECIFIED",
+        "MALE",
+        "FEMALE",
+        "OTHER"
+      ],
+      "default": "NOT_SPECIFIED"
     },
-    "userspbGetUserByIDRequest": {
+    "userspbGetProfileResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "userspbGetUserRequest": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string"
+        "Profile": {
+          "$ref": "#/definitions/userspbProfile"
+        },
+        "user": {
+          "$ref": "#/definitions/userspbUser"
         }
       }
     },
@@ -324,6 +393,32 @@
       "properties": {
         "greeting": {
           "type": "string"
+        }
+      }
+    },
+    "userspbProfile": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "type": "string"
+        },
+        "gender": {
+          "$ref": "#/definitions/userspbGender"
+        }
+      }
+    },
+    "userspbSetProfileRequest": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/definitions/userspbProfile"
         }
       }
     },

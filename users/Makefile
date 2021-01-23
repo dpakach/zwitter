@@ -1,14 +1,13 @@
 SERVER_OUT := "bin/server"
-CLIENT_OUT := "bin/client"
 API_OUT := "api/userspb/api.pb.go"
 API_REST_OUT := "api/userspb/api.pb.gw.go"
 PKG := "github.com/dpakach/zwitter/users"
 SERVER_PKG_BUILD := "${PKG}/server"
-CLIENT_PKG_BUILD := "${PKG}/client"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 VERSION := 1.0
+GOPATH ?= '${HOME}/go'
 
-.PHONY: all api server client
+.PHONY: all api server
 
 all: server
 
@@ -17,7 +16,8 @@ api/userspb/api.pb.go: api/users_api.proto
 		-I/usr/local/include \
 		-I${GOPATH}/src \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-		--go_out=plugins=grpc:api \
+		--go_out=api \
+		--go-grpc_out=api \
 		api/users_api.proto
 
 api/userspb/api.pb.gw.go: api/users_api.proto
@@ -33,7 +33,7 @@ swagger: api
 		-I/usr/local/include \
 		-I${GOPATH}/src \
 		-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-		--swagger_out=logtostderr=true:./swagger \
+		--openapiv2_out=logtostderr=true:./swagger \
 		api/users_api.proto
 
 docs: swagger ## Generate swagger documentation files
@@ -46,11 +46,9 @@ dep: ## download the go dependencies
 server: dep ## Build the server binary
 	@go build -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
 
-client: dep ## Build the client binary
-	@go build -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
 
 clean: ## Clean all the build products
-	@rm -rf $(SERVER_OUT) $(CLIENT_OUT)
+	@rm -rf $(SERVER_OUT)
 
 docker-build: ## build the docker images for the service
 	docker build -t zwiter/users:$(VERSION) --build-arg service_name=users -f ../service/Dockerfile  .. --no-cache

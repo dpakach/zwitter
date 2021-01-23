@@ -14,6 +14,7 @@ import (
 )
 
 type Server struct {
+	userspb.UnimplementedUsersServiceServer
 	Log *zlog.ZwitLogger
 }
 
@@ -119,11 +120,7 @@ func (s *Server) GetProfile(ctx context.Context, in *userspb.EmptyData) (*usersp
 		return nil, status.Errorf(codes.Unauthenticated, "Invalid userid")
 	}
 
-	s.Log.Info(user.Username)
-	s.Log.Info(string(user.Id))
 	dbUser := data.UserStore.GetByID(user.Id)
-	s.Log.Info(dbUser.Username)
-	s.Log.Info(string(dbUser.ID))
 	if dbUser == nil {
 		s.Log.Errorf("Failed to Fetch the user: User doesn't exists")
 		return nil, status.Errorf(codes.NotFound, "User not found")

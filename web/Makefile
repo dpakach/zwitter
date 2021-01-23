@@ -15,7 +15,7 @@ server: dep ## Build the server binary
 	@go build -v -o $(SERVER_OUT) $(SERVER_PKG_BUILD)
 
 clean: ## Clean all the build products
-	@rm -rf $(SERVER_OUT) $(CLIENT_OUT)
+	@rm -rf $(SERVER_OUT)
 
 docker-build: ## build the docker images for the service
 	docker build -t zwiter/web:$(VERSION) --build-arg service_name=web -f ../service/Dockerfile  .. --no-cache

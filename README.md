@@ -52,6 +52,8 @@ Now restart he service with following command
 make restart-service SERVICE=posts
 ```
 
+You will also need to install go protobuf dependency along with [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) or the code generation on the server side. First you will need to have the protoc compiler for protobuf files. You can installit following [this](https://developers.google.com/protocol-buffers/docs/gotutorial#compiling-your-protocol-buffers) guide. After that install grpc-gateway and its required dependencies from [here](https://github.com/grpc-ecosystem/grpc-gateway). With all the dependencies out of the way, you should be ready to go.
+
 ### Architecture
 Zwitter is composed of five different microservice components. These services are containerized using docker and can be run using docker-composer to start the whole system.
 
@@ -99,7 +101,6 @@ Available commands
 
 api                            Auto-generate grpc go sources
 clean                          Clean all build products
-client                         Build the client binary
 dep                            Download go dependencies
 docker-build                   Build the docker image of the service
 docker-run                     Build and run the service in a docker container
