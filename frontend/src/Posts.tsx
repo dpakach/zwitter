@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import { Redirect, useHistory } from 'react-router';
 import { tokenToString } from 'typescript';
 import { get, post, sendFileUploadRequest } from './helpers/request';
 import Post from './Post';
@@ -8,15 +9,18 @@ import { CreatePostRequest, Tokens } from './types/types';
 type PostsProps = {
   tokens: Tokens;
   loggedIn: boolean;
+  showInput: boolean;
 };
 function Posts(props: PostsProps) {
-  const { loggedIn, tokens } = props;
+  const { loggedIn, tokens, showInput } = props;
   const [postText, setPostText]: [string, (prop: string) => void] = useState('');
   const [posts, setPosts] = useState([]);
   const [message, setMessage]: [string, (prop: string) => void] = useState('');
+  const history = useHistory();
 
   useEffect(() => {
-    get('/posts', { headers: loggedIn ? { token: tokens.token } : {} })
+    const url = loggedIn ? '/posts/feed/postfeed' : '/posts';
+    get(url, { headers: loggedIn ? { token: tokens.token } : {} })
       .then((res) => res.json())
       .then(
         (json) => {
@@ -60,6 +64,7 @@ function Posts(props: PostsProps) {
           setPosts([json.post, ...posts]);
           setPostText('');
           setMessage('Successfully created a post');
+          history.push(`/post/${json.post.id}`);
         },
         (error) => {
           setMessage('Error: ' + error.message);
@@ -71,7 +76,7 @@ function Posts(props: PostsProps) {
     <>
       <h2>Posts</h2>
       {!message || <p>{message}</p>}
-      {!props.loggedIn || (
+      {showInput && loggedIn && (
         <form onSubmit={handleSubmit}>
           <textarea
             placeholder="Create a new post"

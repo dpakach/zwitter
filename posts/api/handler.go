@@ -128,14 +128,20 @@ func (s *Server) CreatePost(ctx context.Context, in *postspb.CreatePostRequest) 
 	}, nil
 }
 
-func (s *Server) GetPosts(ctx context.Context, in *postspb.EmptyData) (*postspb.GetPostsResponse, error) {
+func (s *Server) GetPosts(ctx context.Context, in *postspb.GetPostsRequest) (*postspb.GetPostsResponse, error) {
 	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
 	if !ok {
 		s.Log.Errorf("Failed to create a new post: Service not configured properly")
 		return nil, fmt.Errorf("Not configured properly")
 	}
 
-	posts := data.PostStore.GetPosts()
+	posts := []data.Post{}
+
+	if in.GetAuthor() == 0 {
+		posts = data.PostStore.GetPosts()
+	} else {
+		posts = data.PostStore.GetPostsByUser(in.GetAuthor())
+	}
 
 	result := []*postspb.Post{}
 
@@ -266,5 +272,40 @@ func (s *Server) Rezweet(ctx context.Context, in *postspb.RezweetRequest) (*post
 
 	return &postspb.CreatePostResponse{
 		Post: postPb(ctx, post, resp.User),
+	}, nil
+}
+
+func (s *Server) UserFeed(ctx context.Context, in *postspb.EmptyData) (*postspb.GetPostsResponse, error) {
+	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
+	if !ok {
+		s.Log.Errorf("Failed to get user: Invalid userId")
+		return nil, errors.New("Invalid userid")
+	}
+
+	svc, ok := ctx.Value(auth.ServiceKey).(*service.Service)
+	if !ok {
+		s.Log.Errorf("Failed to create a new post: Service not configured properly")
+		return nil, fmt.Errorf("Not configured properly")
+	}
+
+	resp, err := svc.UsersServiceClient.GetUserFollowing(context.Background(), &userspb.GetUserFollowingRequest{Userid: user.Id})
+	if err != nil {
+		s.Log.Errorf("Failed to fetch users from users service")
+		return nil, errors.New("Failed while retriving users")
+	}
+
+	posts := data.PostStore.GetUserFeed(user.Id, resp.GetUsers())
+
+	result := []*postspb.Post{}
+	for _, post := range posts {
+		resp, err := svc.UsersServiceClient.GetUserByID(context.Background(), &userspb.GetUserByIDRequest{Id: post.Author})
+		if err != nil {
+			s.Log.Errorf("Failed to fetch users from users service")
+			return nil, errors.New("Failed while retriving users")
+		}
+		result = append(result, postPb(ctx, &post, resp.User))
+	}
+	return &postspb.GetPostsResponse{
+		Posts: result,
 	}, nil
 }

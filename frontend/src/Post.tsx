@@ -120,7 +120,7 @@ function Post({ post: p, tokens, level, loggedIn, clickable }: PostProps) {
 
   return (
     <>
-      {Object.keys(post.rezweet).length === 0 ? (
+      {post.rezweet.id === '0' ? (
         <></>
       ) : (
         <>
@@ -141,7 +141,7 @@ function Post({ post: p, tokens, level, loggedIn, clickable }: PostProps) {
       >
         <Link onClick={() => updatePage(updateKey + 1)} to={`/post/${post.id}`}>
           <p>{post.text}</p>
-          {!post.rezweet ? <></> : getRezweet(post.rezweet)}
+          {post.rezweet.id === '0' ? <></> : getRezweet(post.rezweet)}
           <Link className="username" to={`/profile/${post.author.username}`}>
             <b>@{post.author.username}</b>
           </Link>

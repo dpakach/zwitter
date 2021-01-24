@@ -20,7 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 type PostsServiceClient interface {
 	SayHello(ctx context.Context, in *PingMessage, opts ...grpc.CallOption) (*PingMessage, error)
 	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error)
-	GetPosts(ctx context.Context, in *EmptyData, opts ...grpc.CallOption) (*GetPostsResponse, error)
+	GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*GetPostsResponse, error)
+	UserFeed(ctx context.Context, in *EmptyData, opts ...grpc.CallOption) (*GetPostsResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	GetPostChilds(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostsResponse, error)
 	LikePost(ctx context.Context, in *LikeRequest, opts ...grpc.CallOption) (*EmptyData, error)
@@ -53,9 +54,18 @@ func (c *postsServiceClient) CreatePost(ctx context.Context, in *CreatePostReque
 	return out, nil
 }
 
-func (c *postsServiceClient) GetPosts(ctx context.Context, in *EmptyData, opts ...grpc.CallOption) (*GetPostsResponse, error) {
+func (c *postsServiceClient) GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*GetPostsResponse, error) {
 	out := new(GetPostsResponse)
 	err := c.cc.Invoke(ctx, "/postspb.PostsService/GetPosts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postsServiceClient) UserFeed(ctx context.Context, in *EmptyData, opts ...grpc.CallOption) (*GetPostsResponse, error) {
+	out := new(GetPostsResponse)
+	err := c.cc.Invoke(ctx, "/postspb.PostsService/UserFeed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +114,8 @@ func (c *postsServiceClient) Rezweet(ctx context.Context, in *RezweetRequest, op
 type PostsServiceServer interface {
 	SayHello(context.Context, *PingMessage) (*PingMessage, error)
 	CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error)
-	GetPosts(context.Context, *EmptyData) (*GetPostsResponse, error)
+	GetPosts(context.Context, *GetPostsRequest) (*GetPostsResponse, error)
+	UserFeed(context.Context, *EmptyData) (*GetPostsResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	GetPostChilds(context.Context, *GetPostRequest) (*GetPostsResponse, error)
 	LikePost(context.Context, *LikeRequest) (*EmptyData, error)
@@ -122,8 +133,11 @@ func (UnimplementedPostsServiceServer) SayHello(context.Context, *PingMessage) (
 func (UnimplementedPostsServiceServer) CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
 }
-func (UnimplementedPostsServiceServer) GetPosts(context.Context, *EmptyData) (*GetPostsResponse, error) {
+func (UnimplementedPostsServiceServer) GetPosts(context.Context, *GetPostsRequest) (*GetPostsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPosts not implemented")
+}
+func (UnimplementedPostsServiceServer) UserFeed(context.Context, *EmptyData) (*GetPostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserFeed not implemented")
 }
 func (UnimplementedPostsServiceServer) GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
@@ -187,7 +201,7 @@ func _PostsService_CreatePost_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _PostsService_GetPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EmptyData)
+	in := new(GetPostsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -199,7 +213,25 @@ func _PostsService_GetPosts_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/postspb.PostsService/GetPosts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostsServiceServer).GetPosts(ctx, req.(*EmptyData))
+		return srv.(PostsServiceServer).GetPosts(ctx, req.(*GetPostsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostsService_UserFeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyData)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostsServiceServer).UserFeed(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/postspb.PostsService/UserFeed",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostsServiceServer).UserFeed(ctx, req.(*EmptyData))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -294,6 +326,10 @@ var PostsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPosts",
 			Handler:    _PostsService_GetPosts_Handler,
+		},
+		{
+			MethodName: "UserFeed",
+			Handler:    _PostsService_UserFeed_Handler,
 		},
 		{
 			MethodName: "GetPost",

@@ -24,7 +24,6 @@ export default function Signup(props: signupProps) {
         () => {
           setMessage('Success: Created User');
           setTimeout(() => {
-            props.setLoggedIn(true);
             setCompleted(true);
           }, 2000);
         },

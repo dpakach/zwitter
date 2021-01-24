@@ -60,6 +60,10 @@ message LikeRequest {
   int64 post=1;
 }
 
+message GetPostsRequest {
+  int64 author=1;
+}
+
 service PostsService {
   rpc SayHello(PingMessage) returns (PingMessage) {
     option (google.api.http) = {
@@ -73,11 +77,16 @@ service PostsService {
        body: "*"
      };
   };
-	rpc GetPosts(EmptyData) returns (GetPostsResponse) {
+	rpc GetPosts(GetPostsRequest) returns (GetPostsResponse) {
      option (google.api.http) = {
        get: "/posts"
      };
   };
+  rpc UserFeed(EmptyData) returns (GetPostsResponse) {
+    option (google.api.http) = {
+       get: "/posts/feed/postfeed"
+     };
+  }
 	rpc GetPost(GetPostRequest) returns (GetPostResponse) {
      option (google.api.http) = {
        get: "/posts/{id=*}"
