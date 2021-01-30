@@ -29,6 +29,8 @@ message Profile {
   string displayName=2;
   string dateOfBirth=3;
   Gender gender=4;
+  int64 followers=6;
+  int64 following=7;
 }
 
 message CreateUserRequest {
@@ -77,6 +79,19 @@ message GetProfileRequest {
 message GetProfileResponse {
   Profile Profile=1;
   User user=2;
+  bool following=3;
+}
+
+message FollowUserRequest {
+  string username=1;
+}
+
+message GetUserFollowingRequest {
+  int64 userid=1;
+}
+
+message GetUserFollowingResponse {
+ 	repeated int64 users=1;
 }
 
 service UsersService {
@@ -99,7 +114,7 @@ service UsersService {
   };
   rpc GetProfile(EmptyData) returns (GetProfileResponse) {
      option (google.api.http) = {
-       get: "/users/profile"
+       get: "/users/self/profile"
      };
   }
 	rpc GetUser(GetUserRequest) returns (GetUserResponse) {
@@ -127,6 +142,21 @@ service UsersService {
   rpc GetUserProfile(GetProfileRequest) returns (GetProfileResponse) {
      option (google.api.http) = {
        get: "/users/profile/{username=*}"
+     };
+  }
+  rpc FollowUser(FollowUserRequest) returns (EmptyData) {
+     option (google.api.http) = {
+       post: "/users/follow/{username=*}"
+     };
+  }
+  rpc UnFollowUser(FollowUserRequest) returns (EmptyData) {
+     option (google.api.http) = {
+       post: "/users/unfollow/{username=*}"
+     };
+  }
+  rpc GetUserFollowing(GetUserFollowingRequest) returns (GetUserFollowingResponse) {
+     option (google.api.http) = {
+       post: "/users/following/{userid=*}"
      };
   }
 }

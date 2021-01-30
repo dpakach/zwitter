@@ -86,7 +86,11 @@ export default function App() {
               <Route exact path="/profile/:user">
                 <ProfilePage loggedIn={loggedIn} tokens={tokens} />
               </Route>
-              <Route exact path="/" render={(props) => <Posts {...props} loggedIn={loggedIn} tokens={tokens} />} />
+              <Route
+                exact
+                path="/"
+                render={(props) => <Posts {...props} loggedIn={loggedIn} tokens={tokens} showInput={true} />}
+              />
             </Switch>
           </div>
         </div>

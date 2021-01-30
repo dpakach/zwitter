@@ -45,6 +45,18 @@ func (p *Posts) GetPosts() []Post {
 	return posts
 }
 
+func (p *Posts) GetPostsByUser(userid int64) []Post {
+	posts := []Post{}
+	for _, item := range p.Posts {
+		if item.Author == userid {
+			childs := p.GetPostChilds(item.ID)
+			item.Children = childs
+			posts = append(posts, item)
+		}
+	}
+	return posts
+}
+
 func (p *Posts) GetPostChilds(id int64) []Post {
 	posts := []Post{}
 	for _, item := range p.Posts {
@@ -64,6 +76,28 @@ func (p *Posts) GetPostWithChilds(id int64) *Post {
 		post.Children = childs
 	}
 	return post
+}
+
+func (p *Posts) GetUserFeed(userId int64, following []int64) []Post {
+	posts := []Post{}
+	for _, item := range p.Posts {
+		found := false
+		for _, id := range following {
+			if id == item.Author {
+				found = true
+				break
+			}
+		}
+		if !found {
+			continue
+		}
+		if item.ParentId == 0 {
+			childs := p.GetPostChilds(item.ID)
+			item.Children = childs
+			posts = append(posts, item)
+		}
+	}
+	return posts
 }
 
 // NewID returns new ID for the new Post

@@ -22,7 +22,9 @@ function SinglePost(props: SinglePostParams) {
   useEffect(() => {
     if (postId) {
       get(`/posts/${postId}`, {})
-        .then((res) => res.json())
+        .then((res) => {
+          return res.json();
+        })
         .then(
           (json) => {
             setPost(json.post);

@@ -10,6 +10,8 @@ service: ## build the binary and docker image of $SERVICE service
 	cd $(SERVICE) && \
 	make && make docker-build
 
+restart: stop run
+
 restart-service: ## Restart a service $SERVICE
 	make -C $(SERVICE) api
 	make -C $(SERVICE)

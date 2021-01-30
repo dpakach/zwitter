@@ -103,13 +103,26 @@ func (s *Server) GetUserByID(ctx context.Context, in *userspb.GetUserByIDRequest
 
 func (s *Server) GetUserProfile(ctx context.Context, in *userspb.GetProfileRequest) (*userspb.GetProfileResponse, error) {
 	s.Log.Info("get user profile")
-	user := data.UserStore.GetByUsername(in.GetUsername())
-	if user == nil {
+	user, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
+	if !ok {
+		s.Log.Info("Unauthenticated request for getUserProfile")
+	}
+
+	dbUser := data.UserStore.GetByUsername(in.GetUsername())
+	if dbUser == nil {
 		s.Log.Errorf("Failed to Fetch the user: User doesn't exists")
 		return nil, status.Errorf(codes.NotFound, "User not found")
 	}
-	profile := data.ProfileStore.GetByID(user.ID)
-	return &userspb.GetProfileResponse{Profile: profilePb(profile), User: userPb(user)}, nil
+
+	isFollowing := false
+	if user != nil {
+		following := data.FollowStore.GetByUserAndFollows(user.Id, dbUser.GetID())
+		if following != nil {
+			isFollowing = true
+		}
+	}
+	profile := data.ProfileStore.GetByID(dbUser.ID)
+	return &userspb.GetProfileResponse{Profile: profilePb(profile), User: userPb(dbUser), Following: isFollowing}, nil
 }
 
 func (s *Server) GetProfile(ctx context.Context, in *userspb.EmptyData) (*userspb.GetProfileResponse, error) {
@@ -152,4 +165,83 @@ func (s *Server) SetProfile(ctx context.Context, in *userspb.SetProfileRequest) 
 		profile.Gender = int(in.GetProfile().GetGender())
 	}
 	return &userspb.GetProfileResponse{Profile: profilePb(profile), User: userPb(user)}, nil
+}
+
+func (s *Server) FollowUser(ctx context.Context, in *userspb.FollowUserRequest) (*userspb.EmptyData, error) {
+	ctxUser, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
+	if !ok {
+		s.Log.Errorf("Failed to set the user profile: User not authenticated properly")
+		return nil, status.Errorf(codes.Unauthenticated, "Invalid userid")
+	}
+
+	user := data.UserStore.GetByID(ctxUser.Id)
+	if user == nil {
+		s.Log.Errorf("Failed to Fetch the user: User doesn't exists")
+		return nil, status.Errorf(codes.NotFound, "User not found")
+	}
+
+	followUser := data.UserStore.GetByUsername(in.GetUsername())
+	if followUser == nil {
+		s.Log.Errorf("Failed to Fetch the follow user: User doesn't exists")
+		return nil, status.Error(codes.NotFound, "Follow User not found")
+	}
+
+	followExists := data.FollowStore.GetByUserAndFollows(user.GetID(), followUser.GetID())
+	if followExists != nil {
+		s.Log.Errorf("Failed to follow the user: already following")
+		return nil, status.Errorf(codes.AlreadyExists, "Already following the User")
+	}
+
+	follow := &data.Follow{User: user.GetID(), Follows: followUser.GetID()}
+
+	data.FollowStore.AddDbList(follow)
+
+	return &userspb.EmptyData{}, nil
+}
+
+func (s *Server) UnFollowUser(ctx context.Context, in *userspb.FollowUserRequest) (*userspb.EmptyData, error) {
+	ctxUser, ok := ctx.Value(auth.ClientIDKey).(*auth.UserMetaData)
+	if !ok {
+		s.Log.Errorf("Failed to set the user profile: User not authenticated properly")
+		return nil, status.Errorf(codes.Unauthenticated, "Invalid userid")
+	}
+
+	user := data.UserStore.GetByID(ctxUser.Id)
+	if user == nil {
+		s.Log.Errorf("Failed to Fetch the user: User doesn't exists")
+		return nil, status.Errorf(codes.NotFound, "User not found")
+	}
+
+	followUser := data.UserStore.GetByUsername(in.GetUsername())
+	if followUser == nil {
+		s.Log.Errorf("Failed to Fetch the follow user: User doesn't exists")
+		return nil, status.Error(codes.NotFound, "Follow User not found")
+	}
+
+	followExists := data.FollowStore.GetByUserAndFollows(user.GetID(), followUser.GetID())
+	if followExists == nil {
+		s.Log.Errorf("Failed to unfollow the user: not following currently")
+		return nil, status.Errorf(codes.AlreadyExists, "Failed to unfollow the user: not following currently")
+	}
+
+	data.FollowStore.DeleteFollow(user.GetID(), followUser.GetID())
+
+	return &userspb.EmptyData{}, nil
+}
+
+func (s *Server) GetUserFollowing(ctx context.Context, in *userspb.GetUserFollowingRequest) (*userspb.GetUserFollowingResponse, error) {
+	followUser := data.UserStore.GetByID(in.GetUserid())
+
+	if followUser == nil {
+		s.Log.Errorf("Failed to Fetch the follow user: User doesn't exists")
+		return nil, status.Error(codes.NotFound, "Follow User not found")
+	}
+
+	users := []int64{}
+	follows := data.FollowStore.GetfollowByUser(followUser.GetID())
+	for _, follows := range follows {
+		users = append(users, follows.Follows)
+	}
+
+	return &userspb.GetUserFollowingResponse{Users: users}, nil
 }

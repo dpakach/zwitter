@@ -4,6 +4,7 @@ import { Redirect, useParams } from 'react-router-dom';
 import { get, post } from './helpers/request';
 import { getDate } from './helpers/date';
 import { User, Tokens, Genders } from './types/types';
+import Posts from './Posts';
 
 type ProfileProps = {
   tokens: Tokens;
@@ -32,23 +33,31 @@ function ProfilePage(props: ProfileProps) {
   const [gender, setGender] = useState(Genders.NOT_SPECIFIED);
   const [birthday, setBirthday]: [string, (prop: string) => void] = useState('');
   const [user, setUser] = useState({} as User);
+  const [following, setFollowing] = useState(false);
 
   useEffect(() => {
-    let url = '/users/profile';
+    let url;
     if (profileUser) {
-      url += `/${profileUser}`;
+      url = `/users/profile/${profileUser}`;
+    } else {
+      url = '/users/self/profile';
     }
-    get(url, { headers: { token: tokens.token } })
+    const headers = loggedIn ? { token: tokens.token } : {};
+    get(url, { headers })
       .then((res) => res.json())
       .then((data) => {
         setDisplayName(data.Profile['displayName'] || '');
         setBirthday(data.Profile['dateOfBirth'] || '');
         setGender(data.Profile['gender'] || Genders.NOT_SPECIFIED);
         setUser(data.user);
+        setFollowing(data.following);
       });
   }, []);
 
   function handleSubmit(e) {
+    if (!loggedIn) {
+      return;
+    }
     e.preventDefault();
     return post('/users/profile', {
       body: { profile: { userId: user.id, displayName, gender: gender, dateOfBirth: birthday } },
@@ -65,12 +74,35 @@ function ProfilePage(props: ProfileProps) {
       );
   }
 
+  function toggleFollow(e) {
+    if (!loggedIn) {
+      return;
+    }
+    e.preventDefault();
+    const urlPrefix = following ? 'unfollow' : 'follow';
+    return post(`/users/${urlPrefix}/${user.username}`, {
+      headers: { token: tokens.token },
+      body: { username: user.username },
+    })
+      .then((res) => res.json())
+      .then(
+        () => {
+          setMessage(`Success: ${urlPrefix}ed the user`);
+          setFollowing(!following);
+        },
+        (error) => {
+          setMessage('Error: ' + error.message);
+        },
+      );
+  }
+
   return (
     <>
       {self && !loggedIn && <Redirect to="/" />}
       <div>
         {displayName || 'Name not set'} ({getGenderName(gender) || 'Gender not specified'})
-        <br />@{user.username}
+        <br />@{user.username}{' '}
+        {loggedIn && profileUser && <a onClick={toggleFollow}>{following ? 'Unfollow' : 'follow'}</a>}
         <br />
         joined {getDate(user.created)}
         <br />
@@ -121,6 +153,8 @@ function ProfilePage(props: ProfileProps) {
           </form>
         </>
       )}
+      <h3>Posts by @{user.username}</h3>
+      <Posts loggedIn={loggedIn} tokens={tokens} showInput={false} />
     </>
   );
 }
