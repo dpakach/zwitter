@@ -1,0 +1,112 @@
+.navigation {
+    background-color: $color-navy-light;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: $nav-height;
+    width: 100vw;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    box-shadow: $box-shadow-small;
+  
+    @include respond(tab-port){
+      top: 0;
+      left: 0;
+      grid-template-columns: auto auto;
+    }
+  
+  
+    &__title {
+      display: none;
+      font-size: 1.5rem;
+      margin: auto 1rem;
+      color: $color-grey-light;
+  
+      @include respond(tab-port){
+        display: inline-block;
+      }
+  
+    }
+    &__icon {
+      // padding: 1rem;
+      // background-color: $color-navy-light;
+      // font-size: 1rem;
+      margin: 0 auto;
+      // border-radius: 50%;
+      margin-top: .4rem;
+      // color: $color-white;
+  
+      &:hover {
+        // background-color: rgba($color-navy-light, 0.3);
+      }
+  
+      @include respond(tab-port){
+        margin: auto 0rem auto auto;
+      }
+    }
+  
+    &__list {
+      height:$nav-height;
+      list-style: none;
+      text-align: center;
+  
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
+  
+      align-items: center;
+    }
+  
+    &__item {
+      height:$nav-height;
+      background-color: $color-navy-light;
+      // border-top: 1px solid $color-grey-light-3;
+      // border-radius: 2px;
+      color: $color-grey-light;
+  
+      display: grid;
+      grid-template-columns: 1fr;
+      justify-content: space-around;
+      align-items: center;
+      transition: all .3s ease;
+  
+      @include respond(tab-port) {
+        grid-template-columns: auto 1fr;
+        padding-left: 1rem;
+      }
+      
+  
+      &:hover {
+        background-color: rgba($color-grey-light, 0.3);
+      }
+  
+      &--active {
+        color: $color-navy-light;
+        // border-top: 1px solid transparent;
+        // border-left: 1px solid $color-grey-light-3;
+        // border-right: 1px solid $color-grey-light-3;
+        background-color: $color-grey-light;
+        // margin-top: 20%;
+  
+        &:hover {
+          // background-color: rgba($color-navy-light, 0.1);
+          color: white;
+        }
+  
+        .icon__label {
+          // display: block !important;
+        }
+      }
+    }
+  
+    &__label {
+      font-size: 1rem;
+      // display: none;
+      
+  
+      @include respond(tab-port){
+        margin-left: .5rem;
+        font-size: 1rem;
+        text-align: left;
+      }
+    }
+  }
