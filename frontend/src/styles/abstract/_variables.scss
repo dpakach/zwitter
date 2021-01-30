@@ -1,0 +1,57 @@
+// colors
+
+// GREEN
+$color-green: #55c57a;
+$color-green-light: #7ed56f;
+$color-green-dark: #28b485;
+
+// ORANGE
+$color-orange-light: #ffb900;
+$color-orange-dark: #ff7730;
+
+// NAVY
+$color-navy-light: #2998ff;
+$color-navy-dark: #5643fa;
+
+// BLUE
+$color-blue-lightest:   #cad7e0;
+$color-blue-light:      #406e8e;
+$color-blue-dark:       #161925;
+
+//RED
+$color-red-lightest:#f14a78;
+$color-red-light: #f0386b;
+$color-red-dark:#db3362; 
+
+// GREY
+$color-grey-dark-1:#333;
+$color-grey-dark-2:#555;
+$color-grey-dark-3:#777;
+$color-grey-dark-4:#999;
+
+$color-grey-light: #fcfcfc;
+$color-grey-light-1: #f6f6f6;
+$color-grey-light-2: #eee;
+$color-grey-light-3: #ccc;
+
+
+$color-white: #fff;
+$color-black: #000;
+
+// grid
+$grid-width: 114rem;
+$gutter-vertical: 8rem;
+$gutter-vertical-small: 6rem;
+$gutter-horizontal: 6rem;
+
+//font
+$default-font-size: 1.6rem;
+
+$nav-height: 3.5rem;
+$body-height: calc(100vh-3.5rem);
+
+
+$box-shadow-small: 0 -0.1rem 1rem 0.1rem rgba($color-black, 0.3);
+
+
+$sidebar-width: 25rem;

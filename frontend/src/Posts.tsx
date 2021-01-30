@@ -90,9 +90,11 @@ function Posts(props: PostsProps) {
           <input type="file" id="create-post-media-input" />
         </form>
       )}
-      {posts.map((post) => (
-        <Post post={post} key={post.id} tokens={props.tokens} level={0} clickable={true} {...props} />
-      ))}
+      <div className="list">
+        {posts.map((post) => (
+          <Post post={post} key={post.id} tokens={props.tokens} level={0} clickable={true} {...props} />
+        ))}
+      </div>
     </>
   );
 }

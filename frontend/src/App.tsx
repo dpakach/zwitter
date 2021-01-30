@@ -12,6 +12,9 @@ import Docs from './Docs';
 import './styles/main.scss';
 import { Tokens } from './types/types';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSignOutAlt, faHome, faUser, faUserPlus } from '@fortawesome/free-solid-svg-icons'
+
 export default function App() {
   const tokensString = window.localStorage.getItem('tokens');
 
@@ -44,30 +47,56 @@ export default function App() {
     <Router>
       <div className="main">
         <div className="container">
-          <h1 className="header">Zwitter</h1>
-          {message && <p> {message} </p>}
+          <div className="navigation">
+            <h1 className="navigation__title">ZWITTER</h1>
+            <ul className="navigation__list">
+              <Link to="/">
+                <li className="navigation__item navigation__item--active">
+                  <FontAwesomeIcon className="navigation__icon" icon={faHome} />
+                  <p className="navigation__label">Home</p>
+                </li>
+              </Link>
+              {loggedIn ? (
+                <>
+                  <Link to="/profile">
+                    <li className="navigation__item navigation__item--active">
+                      <FontAwesomeIcon className="navigation__icon" icon={faUser} />
+                      <p className="navigation__label">Profile</p>
+                    </li>
+                  </Link>
+
+                  <Link to="#" onClick={handleLogout}>
+                    <li className="navigation__item navigation__item--active">
+                      <FontAwesomeIcon className="navigation__icon" icon={faSignOutAlt} />
+                      <p className="navigation__label">Logout</p>
+                    </li>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <li className="navigation__item navigation__item--active">
+                      <FontAwesomeIcon className="navigation__icon" icon={faUser} />
+                      <p className="navigation__label">Login</p>
+                    </li>
+                  </Link>
+                  <Link to="/signup">
+                    <li className="navigation__item navigation__item--active">
+                      <FontAwesomeIcon className="navigation__icon" icon={faUserPlus} />
+                      <p className="navigation__label">Signup</p>
+                    </li>
+                  </Link>
+                </>
+              )}              
+            </ul>
+          </div>
+          
           {loggedIn && (
             <p>
               Logged in as <b>@{tokens.user.username}</b>
             </p>
           )}
-          <div>
-            <Link to="/">Home </Link>
-            {loggedIn ? (
-              <>
-                <Link to="/profile">Profile </Link>
-                <Link to="#" onClick={handleLogout}>
-                  {' '}
-                  Logout{' '}
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link to="/login">Login </Link>
-                <Link to="/signup">Signup </Link>
-              </>
-            )}
-
+          <div className="main-content">
             <Switch>
               <Route
                 exact

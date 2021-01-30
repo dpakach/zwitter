@@ -1,0 +1,77 @@
+  
+  *,
+  *::after,
+  *::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+  }
+
+  html {
+  }
+
+  a {
+    text-decoration: none;
+  }
+  
+  body {
+    box-sizing: border-box;
+    background-color: $color-grey-light-1;
+    grid-area: body;
+  
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .main {
+    height: 92vh;
+    overflow: scroll;
+    background-color: #fefefe !important;
+    min-height: 100%;
+
+    @include respond(tab-land) {
+      width: 100rem;
+    }
+  }
+  
+  .navigation {
+    grid-area: navigation;
+    z-index: 100;
+  }
+  
+  .container {
+    max-width: 50rem;
+    overflow: hidden;
+    display: grid;
+  
+    padding: 2rem;
+    margin: 0 auto;
+  
+    grid-template-areas:
+      'body'
+      'navigation';
+  
+    @include respond(tab-land) {
+      grid-template-areas:
+        'navigation'
+        'body';
+    }
+
+    @include respond(tab-port) {
+      padding: .5rem
+    }
+  }
+  
+  .main-content {
+    margin-bottom: $nav-height;
+    margin-top: 0;
+    @include respond(tab-port) {
+      margin-top: $nav-height;
+      margin-bottom: 0;
+    }
+  }
+
+  .username {
+    color: #008ce9;
+  }
