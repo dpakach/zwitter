@@ -18,16 +18,11 @@ restart-service: ## Restart a service $SERVICE
 	docker-compose -f ./docker-compose.envoy.yml restart $(SERVICE)
 
 build: frontend-build ## Build the binaries and docker-images for all the services
-	cd auth && \
-	make && make docker-build && \
-	cd ../posts && \
-	make && make docker-build && \
-	cd ../users && \
-	make && make docker-build && \
-	cd ../media && \
-	make && make docker-build && \
-	cd ../web && \
-	make && make docker-build
+	cd auth && make docker-build && \
+	cd ../posts && make docker-build && \
+	cd ../users && make docker-build && \
+	cd ../media && make docker-build && \
+	cd ../web && make docker-build
 
 clean: ## Clean the build products for all the services
 	cd auth && \
